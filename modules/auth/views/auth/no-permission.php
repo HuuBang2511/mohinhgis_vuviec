@@ -1,0 +1,1 @@
+<h3 class="text-center">Tài khoản của bạn chưa được cấp quyền truy cập. Hãy liên hệ với quản trị viên để được hỗ trợ.</h3>

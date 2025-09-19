@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Created by PhpStorm.
+ * User: Duc
+ * Date: 7/3/2021
+ * Time: 9:00 PM
+ */
+
+use yii\helpers\Html;
+use yii\widgets\Breadcrumbs;
+use \app\modules\assets\AppAsset;
+
+AppAsset::register($this);
+$this->title = 'Quản lý khiếu nại, khiếu kiện';
+?>
+<?php $this->beginPage() ?>
+<!DOCTYPE html>
+<html lang="<?= Yii::$app->language ?>">
+
+<head>
+    <link rel="shortcut icon" href="<?= Yii::$app->homeUrl ?>images/favicon.ico" type="image/x-icon">
+    <meta charset="<?= Yii::$app->charset ?>">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php $this->registerCsrfMetaTags() ?>
+    <title><?= Html::encode($this->title) ?></title>
+    <?php $this->head() ?>
+</head>
+
+<body>
+    <?php $this->beginBody() ?>
+    <div id="page-container" class="sidebar-o enable-page-overlay side-scroll page-header-fixed side-trans-enabled">
+        <div id="page-overlay"></div>
+        <main id="main-container">
+            <div class="content">
+                
+                <?= $content ?>
+            </div>
+        </main>
+
+       
+    </div>
+
+
+
+    <?php $this->endBody() ?>
+</body>
+
+</html>
+<?php $this->endPage() ?>
