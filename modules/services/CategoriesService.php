@@ -10,6 +10,9 @@ use app\modules\quanly\models\DonVi;
 use app\modules\quanly\models\TrangThaiXuLy;
 use app\modules\quanly\models\Phuongxa;
 use app\modules\quanly\models\VuViec;
+use app\modules\quanly\models\danhmuc\DmLoaicutru;
+use app\modules\quanly\models\danhmuc\DmQuanhechuho;
+use app\modules\quanly\models\danhmuc\DmGioitinh;
 use Yii;
 class CategoriesService
 {
@@ -26,6 +29,26 @@ class CategoriesService
     public static function getCategoriesUser(){
         $categories = [];
         $categories['phuongxa'] = Phuongxa::find()->orderBy('ten_dvhc')->asArray()->all();
+        return $categories;
+    }
+
+    public static function getCategoriesNocgia(){
+        $categories = [];
+
+        if(Yii::$app->user->identity->phuongxa !== null){
+            $categories['phuongxa'] = Phuongxa::find()->where(['ma_dvhc' => Yii::$app->user->identity->phuongxa])->orderBy('ten_dvhc')->asArray()->all();
+        }else{
+            $categories['phuongxa'] = Phuongxa::find()->orderBy('ten_dvhc')->asArray()->all();
+        }
+
+        return $categories;
+    }
+
+    public static function getCategoriesCongdan(){
+        $categories = [];
+        $categories['gioitinh'] = DmGioitinh::find()->where(['status' => 1])->orderBy('id')->all();
+        $categories['quanhechuho'] = DmQuanhechuho::find()->where(['status' => 1])->orderBy('id')->all();
+        $categories['loaicutru'] = DmLoaicutru::find()->where(['status' => 1])->orderBy('id')->all();
         return $categories;
     }
 

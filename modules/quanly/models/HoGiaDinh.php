@@ -2,6 +2,9 @@
 
 namespace app\modules\quanly\models;
 
+use app\modules\quanly\models\NguoiDan;
+use app\modules\quanly\base\QuanlyBaseModel;
+use app\modules\quanly\models\NocGia;
 use Yii;
 
 /**
@@ -20,7 +23,7 @@ use Yii;
  * @property NocGia $nocgia
  * @property NguoiDan[] $nguoiDans
  */
-class HoGiaDinh extends \yii\db\ActiveRecord
+class HoGiaDinh extends QuanlyBaseModel
 {
     /**
      * {@inheritdoc}
@@ -80,5 +83,10 @@ class HoGiaDinh extends \yii\db\ActiveRecord
     public function getNguoiDans()
     {
         return $this->hasMany(NguoiDan::className(), ['hogiadinh_id' => 'id']);
+    }
+
+    public function getChuho()
+    {
+        return $this->hasOne(NguoiDan::class, ['hogiadinh_id' => 'id'])->where(['quanhechuho_id' => 1]);
     }
 }

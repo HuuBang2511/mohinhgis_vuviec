@@ -10,5 +10,6 @@ use yii\helpers\Html;
 <div class="noc-gia-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'categories' => $categories
     ]) ?>
 </div>

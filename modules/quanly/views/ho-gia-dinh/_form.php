@@ -12,6 +12,7 @@ use app\widgets\maskedinput\MaskedInputAsset;
 
 use app\widgets\dynamicform\DynamicFormWidget;
 use app\widgets\dynamicform\DynamicFormAsset;
+use yii\web\JsExpression;
 
 MaskedInputAsset::register($this);
 DynamicFormAsset::register($this);
@@ -51,17 +52,29 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php $form = ActiveForm::begin(['id' => 'dynamic-form']); ?>
             <h2 class="content-heading text-uppercase">Thông tin hộ gia đình</h2>
             <div class="row">
-                <div class="col-lg-9">
-                        <?= $form->field($hogiadinh, 'nocgia_id')->widget(Select2::class, [
-                            'data' => ArrayHelper::map($categories['diachi'], 'id', 'dia_chi'),
-                            'options' => ['prompt' => 'Chọn địa chỉ'],
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ]) ?>
-                </div>
+                <div class="col-lg-12">
+                    <?= $form->field($hogiadinh, 'nocgia_id')->widget(Select2::className(), [
+                                'initValueText' =>  ($diachiNocgia != null ? $diachiNocgia['text'] : '') ,
+                                'options' => ['placeholder' => 'Tìm kiếm nóc gia ...', 'id' => 'nocgia_id'],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                    'minimumInputLength' => 3,
+                                    'language' => [
+                                        'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
+                                    ],
+                                    'ajax' => [
+                                        'url' => Url::to('../ajax-data/get-nguoidan'),
+                                        'dataType' => 'json',
+                                        'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                                    ],
+                                    'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                    'templateResult' => new JsExpression('function(city) { return city.text; }'),
+                                    'templateSelection' => new JsExpression('function (city) { return city.text; }'),
+                                ],
+                    ]) ?>
+                    </div>
                 <div class="col-lg-3">
-                    <?= $form->field($hogiadinh, 'hsct')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($hogiadinh, 'ma_hsct')->textInput(['maxlength' => true]) ?>
                 </div>
             </div>
 

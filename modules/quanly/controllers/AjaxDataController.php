@@ -29,6 +29,21 @@ class AjaxDataController extends Controller{
         return json_encode($out);
     }
 
+    public function actionGetNocgia($q = null)
+    {
+        $query = new Query;
+
+        $query->select('id, text')
+            ->from('v_nocgia_timkiem')
+            ->where (['ilike','text' , $q ])
+            ->orderBy('text')
+            ->limit(20);
+        $command = $query->createCommand();
+        $data = $command->queryAll();
+        $out['results'] = array_values($data);
+        return json_encode($out);
+    }
+
     public function actionGetCanbo(){
         Yii::$app->response->format = Response::FORMAT_JSON;
         $out = [];
