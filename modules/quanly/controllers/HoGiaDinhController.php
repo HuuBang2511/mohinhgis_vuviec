@@ -16,6 +16,7 @@ use app\modules\quanly\models\NocGia;
 use app\modules\services\UtilityService;
 use app\modules\quanly\models\NguoiDan;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * HoGiaDinhController implements the CRUD actions for HoGiaDinh model.
@@ -163,54 +164,75 @@ class HoGiaDinhController extends \app\modules\quanly\base\QuanlyBaseController
     public function actionUpdate($id)
     {
         $request = Yii::$app->request;
-        $model = $this->findModel($id);
+        $hogiadinh = $this->findModel($id);
+        $nocgia = $hogiadinh->nocgia;
 
-        if($request->isAjax){
-            /*
-            *   Process for ajax request
-            */
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            if($request->isGet){
-                return [
-                    'title'=> "Cập nhật HoGiaDinh #".$id,
-                    'content'=>$this->renderAjax('update', [
-                        'model' => $model,
-                    ]),
-                    'footer'=> Html::button('Đóng',['class'=>'btn btn-light float-right','data-bs-dismiss'=>"modal"]).
-                                Html::button('Lưu',['class'=>'btn btn-primary float-left','type'=>"submit"])
-                ];
-            }else if($model->load($request->post()) && $model->save()){
-                return [
-                    'forceReload'=>'#crud-datatable-pjax',
-                    'title'=> "HoGiaDinh #".$id,
-                    'content'=>$this->renderAjax('view', [
-                        'model' => $model,
-                    ]),
-                    'footer'=> Html::button('Đóng',['class'=>'btn btn-light float-right','data-bs-dismiss'=>"modal"]).
-                            Html::a('Lưu',['update','id'=>$id],['class'=>'btn btn-primary float-left','role'=>'modal-remote'])
-                ];
-            }else{
-                 return [
-                    'title'=> "Cập nhật HoGiaDinh #".$id,
-                    'content'=>$this->renderAjax('update', [
-                        'model' => $model,
-                    ]),
-                    'footer'=> Html::button('Đóng',['class'=>'btn btn-light float-right','data-bs-dismiss'=>"modal"]).
-                                Html::button('Lưu',['class'=>'btn btn-primary float-left','type'=>"submit"])
-                ];
+        $diachiNocgia = (new Query())->select('id, text')
+            ->from('v_nocgia_timkiem')
+            ->where(['id' => $nocgia->id])
+            ->one();
+
+        $thanhviens = NguoiDan::find()
+            ->where(['hogiadinh_id' => $hogiadinh->id, 'status' => 1])
+            ->andWhere(['or',
+                ['<>', 'quanhechuho_id', 1],
+                ['quanhechuho_id' => null]
+            ])->orderBy('quanhechuho_id')->all();
+
+        if ($request->isPost && $hogiadinh->load($request->post())) {
+
+            $oldIDs = ArrayHelper::map($thanhviens, 'id', 'id');
+            $thanhviens = QuanlyBaseModel::updateMultiple(NguoiDan::classname());
+            $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($thanhviens, 'id', 'id')));
+            QuanlyBaseModel::loadMultiple($thanhviens, Yii::$app->request->post());
+
+            $valid = $hogiadinh->validate();
+
+            if ($valid) {
+                $transaction = \Yii::$app->db->beginTransaction();
+                try {
+                    if ($flag = $hogiadinh->save(false)) {
+
+                        //xử lý xóa công dân đã xóa trong dynamic form
+                        if (sizeof($deletedIDs) > 0) {
+                            foreach ($deletedIDs as $i => $item) {
+                                Yii::$app->db->createCommand("UPDATE nguoi_dan SET status = 0 WHERE id = :id")
+                                    ->bindValue(':id', $item)
+                                    ->execute();
+                            }
+                            //CongDan::deleteAll(['id' => $deletedIDs]);
+                        }
+
+                        //thêm mới hoặc cập nhật thông tin
+                        foreach ($thanhviens as $thanhvien) {
+                            $thanhvien->hogiadinh_id = $hogiadinh->id;
+                            if (!($flag = $thanhvien->save(false))) {
+                                $transaction->rollBack();
+                                break;
+                            }
+                        }
+                    }
+
+                    if ($flag) {
+                        $transaction->commit();
+                        if ($id != null) {
+                            return $this->redirect(['view', 'id' => $id]);
+                        }
+                        return $this->redirect(['index']);
+                    }
+                } catch (Exception $e) {
+                    $transaction->rollBack();
+                }
             }
-        }else{
-            /*
-            *   Process for non-ajax request
-            */
-            if ($model->load($request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            } else {
-                return $this->render('update', [
-                    'model' => $model,
-                ]);
-            }
+            return $this->redirect(['update', 'id' => $id]);
         }
+
+        return $this->render('update', [
+            'hogiadinh' => $hogiadinh,
+            'categories' => CategoriesService::getCategoriesCongdan(),
+            'thanhviens' => (empty($thanhviens)) ? [new CongDan()] : $thanhviens,
+            'diachiNocgia' => $diachiNocgia,
+        ]);
     }
 
     /**

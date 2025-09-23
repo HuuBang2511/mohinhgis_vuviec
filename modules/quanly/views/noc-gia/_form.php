@@ -1,186 +1,272 @@
 <?php
 
 use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\widgets\ActiveForm;
-use kartik\select2\Select2;
+use kartik\date\DatePicker;
+use kartik\form\ActiveForm;
 use yii\helpers\ArrayHelper;
-use app\modules\services\UserInterfaceServices;
-//use wbraganca\dynamicform\DynamicFormWidget;
-use app\widgets\maskedinput\MaskedInput;
-use app\widgets\maskedinput\MaskedInputAsset;
+use yii\helpers\Url;
+use yii\web\JsExpression;
+use kartik\select2\Select2;
+use yii\widgets\MaskedInput;
+use kartik\depdrop\DepDrop;
+use app\widgets\maps\LeafletMapAsset;
 
-use app\widgets\dynamicform\DynamicFormWidget;
-use app\widgets\dynamicform\DynamicFormAsset;
+LeafletMapAsset::register($this);
 
-MaskedInputAsset::register($this);
-DynamicFormAsset::register($this);
+/* @var $this yii\web\View */
+/* @var $categories app\modules\quanly\models\DonViKinhTe */
+/* @var $form yii\widgets\ActiveForm */
 
-$js = '
-jQuery(".dynamicform_wrapper").on("afterInsert", function(e, item) {
-    jQuery(".dynamicform_wrapper .panel-title-address").each(function(index) {
-        jQuery(this).html("Thành viên: " + (index + 1))
-    });
-});
-
-jQuery(".dynamicform_wrapper").on("afterDelete", function(e) {
-    jQuery(".dynamicform_wrapper .panel-title-address").each(function(index) {
-        jQuery(this).html("Thành viên: " + (index + 1))
-    });
-});
-';
-
-$this->registerJs($js);
 $requestedAction = Yii::$app->requestedAction;
 $controller = $requestedAction->controller;
 $label = $controller->label;
 
 $this->title = Yii::t('app', $label[$requestedAction->id] . ' ' . $controller->title);
-$this->params['breadcrumbs'][] = ['label' => $label['index'] . ' ' . $controller->title, 'url' => Yii::$app->urlManager->createUrl(['quanly/ho-gia-dinh/index'])];
+$this->params['breadcrumbs'][] = ['label' => $label['index'] . ' ' . $controller->title, 'url' => Yii::$app->urlManager->createUrl(['quanly/vu-viec/index'])];
 $this->params['breadcrumbs'][] = $this->title;
+
 
 ?>
 
-<div class="hogiadinh-form">
+<!-- CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+<!-- JS -->
+<script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
 
-    <div class="block block-themed">
-        <div class="block-header">
-            <h3 class="block-title"><?= $this->title ?></h3>
-        </div>
-        <div class="block-content">
-            <?php $form = ActiveForm::begin(['id' => 'dynamic-form']); ?>
-            <h2 class="content-heading text-uppercase">Thông tin hộ gia đình</h2>
-            <div class="row">
-                <div class="col-lg-9">
-                        <?= $form->field($hogiadinh, 'nocgia_id')->widget(Select2::class, [
-                            'data' => ArrayHelper::map($categories['diachi'], 'id', 'dia_chi'),
-                            'options' => ['prompt' => 'Chọn địa chỉ'],
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ]) ?>
-                </div>
-                <div class="col-lg-3">
-                    <?= $form->field($hogiadinh, 'hsct')->textInput(['maxlength' => true]) ?>
-                </div>
+<?php $form = ActiveForm::begin([
+    'fieldConfig' => [
+        'errorOptions' => ['encode' => false],
+    ],
+]) ?>
+
+<div class="block block-themed">
+    <div class="block-header">
+        <h3 class="block-title">
+            <?= ($model->isNewRecord) ? 'Thêm mới' : 'Cập nhật' ?>
+        </h3>
+    </div>
+
+    <div class="block-content">
+
+        <div class="row mt-3">
+            <div class="col-lg-3">
+                <?= $form->field($model, 'so_nha')->input('text') ?>
             </div>
-
-            
-
-            <h2 class="content-heading text-uppercase">Thông tin thành viên hộ</h2>
-            <div class="row">
-                <div class="col-lg-12">
-                    <?php DynamicFormWidget::begin([
-                        'widgetContainer' => 'dynamicform_wrapper', // required: only alphanumeric characters plus "_" [A-Za-z0-9_]
-                        'widgetBody' => '.container-items', // required: css class selector
-                        'widgetItem' => '.item', // required: css class
-                        'limit' => 10, // the maximum times, an element can be cloned (default 999)
-                        'min' => 0, // 0 or 1 (default 1)
-                        'insertButton' => '.add-item', // css class
-                        'deleteButton' => '.remove-item', // css class
-                        'model' => $thanhviens[0],
-                        'formId' => 'dynamic-form',
-                        'formFields' => [
-                            'ho_ten',
-                            'ngay_sinh',
-                            'gioitinh_id',
-                            'dantoc_id',
-                            'tongiao_id',
-                            'quanhechuho_id',
-                            'cccd',
-                            'cccd_ngaycap',
-                            'cccd_noicap',
+            <div class="col-lg-3">
+                <?= $form->field($model, 'ten_duong')->input('text') ?>
+            </div>
+            <div class="col-lg-3">
+                <?= $form->field($model, 'phuongxa_id')->widget(Select2::className(), [
+                        'data' => ArrayHelper::map($categories['phuongxa'], 'ma_dvhc', 'ten_dvhc'),
+                        'options' => ['prompt' => 'Chọn phường xã', 'id' => 'phuongxa-id'],
+                        'pluginOptions' => [
+                            'allowClear' => true
                         ],
-                    ]); ?>
-                    <div class="block block-themed block-bordered">
-                        <div class="block-header">
-                            <h3 class="block-title">
-                                <i class="fa fa-user"></i> Thành viên hộ gia đình
-                            </h3>
-                            <div class="block-options">
-                                <button type="button" class="pull-right add-item btn btn-success btn-xs"><i class="fa fa-plus"></i> Thêm thành viên</button>
-                            </div>
-                        </div>
-                        <div class="block-content container-items"><!-- widgetContainer -->
-                            <?php foreach ($thanhviens as $index => $thanhvien) : ?>
-                                <div class="item block block-themed w-100 d-block h-100 block-bordered"><!-- widgetBody -->
-                                    <div class="block-header">
-                                        <h3 class="block-title">
-                                            <span class="panel-title-address">Thành viên <?= ($index + 1) ?></span>
-                                        </h3>
-                                        <div class="block-options">
-                                            <button type="button" class="pull-right remove-item btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>
-                                        </div>
-                                    </div>
-                                    <div class="block-content">
-                                        <?php
-                                        // necessary for update action.
-                                        if (!$thanhvien->isNewRecord) {
-                                            echo Html::activeHiddenInput($thanhvien, "[{$index}]id");
-                                        }
-                                        ?>
-
-                                        <div class="row">
-                                            <div class="col-sm-3">
-                                                <?= $form->field($thanhvien, "[{$index}]ho_ten")->textInput(['maxlength' => true]) ?>
-                                            </div>
-                                            <div class="col-sm-3">
-                                                <?= $form->field($thanhvien, "[{$index}]so_dien_thoai")->textInput(['maxlength' => true]) ?>
-                                            </div>
-                                            <div class="col-sm-3">
-                                                    <?= $form->field($thanhvien, "[{$index}]gioitinh_id")->widget(Select2::class, [
-                                                        'data' => ArrayHelper::map($categories['gioitinh'], 'id', 'ten'),
-                                                        'options' => ['prompt' => 'Chọn giới tính'],
-                                                        'pluginOptions' => [
-                                                            'allowClear' => true
-                                                        ],
-                                                    ]) ?>
-                                            </div>
-                                            <div class="col-sm-3">
-                                                    <?= $form->field($thanhvien, "[{$index}]loaicutru_id")->widget(Select2::class, [
-                                                        'data' => ArrayHelper::map($categories['loaicutru'], 'id', 'ten'),
-                                                        'options' => ['prompt' => 'Chọn loại cư trú'],
-                                                        'pluginOptions' => [
-                                                            'allowClear' => true
-                                                        ],
-                                                    ]) ?>
-                                            </div>
-                                        </div><!-- end:row -->
-
-                                        <div class="row">
-                                            <div class="col-sm-3">
-                                                <?= $form->field($thanhvien, "[{$index}]cccd")->textInput(['maxlength' => true]) ?>
-                                            </div>
-                                            <div class="col-sm-3">
-                                                <?= $form->field($thanhvien, "[{$index}]cccd_ngaycap")->widget(MaskedInput::class, [
-                                                    'clientOptions' => ['alias' =>  'date']
-                                                ]) ?>
-                                            </div>
-                                            <div class="col-sm-4">
-                                                <?= $form->field($thanhvien, "[{$index}]cccd_noicap")->textInput(['maxlength' => true]) ?>
-                                            </div>
-                                            <div class="col-sm-2">
-                                                    <?= $form->field($thanhvien, "[{$index}]quanhechuho_id")->widget(Select2::class, [
-                                                        'data' => ArrayHelper::map($categories['quanhechuho'], 'id', 'ten'),
-                                                        'options' => ['prompt' => 'Chọn quan hệ chủ hộ'],
-                                                        'pluginOptions' => [
-                                                            'allowClear' => true
-                                                        ],
-                                                    ]) ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <?php DynamicFormWidget::end(); ?>
-
-                </div>
+                ]) ?>
             </div>
-            <?= UserInterfaceServices::renderFormFooterButtons()?>
+            <div class="col-lg-3">
+                <?= $form->field($model, 'khupho_id')->widget(DepDrop::class, [
+                                'options'=>['id'=>'khupho-id'],
+                                'type' => DepDrop::TYPE_SELECT2,
+                                'select2Options' => ['pluginOptions' => ['allowClear' => true,]],
+                                'pluginOptions'=>[
+                                    'depends'=>['phuongxa-id'],
+                                    'initialize' => true,
+                                    'placeholder'=>'Chọn khu phố',
+                                    'url'=>Url::to(['../quanly/ajax-data/get-khupho']),
+                                    'allowClear' => true
+                                    
+                    ]
+                ]) ?>
+            </div>
+        </div>
 
-            <?php ActiveForm::end(); ?>
+        <div class="row mt-3">
+            <div class="col-lg-6">
+                <?= $form->field($model, 'lat')->input('text', ['id' => 'geox-input']) ?>
+            </div>
+            <div class="col-lg-6">
+                <?= $form->field($model, 'long')->input('text', ['id' => 'geoy-input']) ?>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg-12">
+                <div id="map" style="height: 600px"></div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg-12 pb-3">
+                <?= Html::submitButton('Lưu', ['class' => 'btn btn-primary', 'id' => 'submitButton']) ?>
+            </div>
         </div>
     </div>
 </div>
+<?php ActiveForm::end(); ?>
+
+<script>
+var map = L.map('map').setView([
+    <?= ($model->long != null) ? $model->long : 10.763496612971204 ?>,
+    <?= ($model->lat != null) ? $model->lat : 106.6465187072754 ?>
+], 18);
+
+// Lớp nền
+
+var hcmgis = L.tileLayer(
+    'https://thuduc-maps.hcmgis.vn/thuducserver/gwc/service/wmts?layer=thuduc:thuduc_maps&style=&tilematrixset=EPSG:900913&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/png&TileMatrix=EPSG:900913:{z}&TileCol={x}&TileRow={y}', {
+        maxZoom: 25,
+        minZoom: 13,
+}).addTo(map);
+
+var googleMap = L.tileLayer('http://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+    maxZoom: 24,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+});
+
+var vetinh = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+    maxZoom: 24,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+});
+
+
+L.control.layers(
+    { "HCMGIS" : hcmgis ,"ggMap": googleMap, "Vệ tinh": vetinh },
+).addTo(map);
+
+
+// Tạo marker
+var icon = L.icon({
+    iconUrl: 'https://auth.hcmgis.vn/uploads/icon/icons8-map-marker-96.png',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -48],
+});
+
+let lastLatLng = null;
+let isManualPosition = false;
+
+
+
+const marker = new L.marker([<?= ($model->long != null) ? $model->long : 10.763496612971204 ?>,
+    <?= ($model->lat != null) ? $model->lat : 106.6465187072754 ?>
+], {
+    'draggable': 'true',
+    'icon': icon,
+}).addTo(map);
+
+// Cập nhật input khi kéo marker
+marker.on('dragend', function (event) {
+    const position = event.target.getLatLng();
+    isManualPosition = true; // đánh dấu người dùng tự chỉnh
+    $('#geoy-input').val(position.lat);
+    $('#geox-input').val(position.lng);
+    map.panTo(position);
+});
+
+// Control định vị
+const locateControl = L.control.locate({
+    position: 'topleft',
+    flyTo: true,
+    keepCurrentZoomLevel: true,
+    drawCircle: false,
+    showPopup: false,
+    strings: {
+        title: "Định vị vị trí của bạn"
+    },
+    icon: 'fa fa-location-arrow',
+    locateOptions: {
+        enableHighAccuracy: true,
+        maxZoom: 18,
+        watch: false
+    },
+    clickBehavior: {
+        inView: 'stop',
+        outOfView: 'setView',
+        inViewNotFollowing: 'setView'
+    }
+}).addTo(map);
+
+// Hỗ trợ touchstart trên điện thoại
+setTimeout(() => {
+    const btn = document.querySelector('.leaflet-control-locate a');
+    if (btn) {
+        const handleLocate = function (e) {
+            e.preventDefault();
+            isManualPosition = false;
+            map.locate({
+                setView: true,
+                maxZoom: 18,
+                enableHighAccuracy: true,
+                watch: false
+            });
+        };
+        btn.addEventListener('click', handleLocate);
+        btn.addEventListener('touchstart', handleLocate);
+    }
+}, 1000);
+
+// Xử lý khi định vị thành công
+map.on("locationfound", function(e) {
+    if (isManualPosition) return; // bỏ qua nếu người dùng tự chỉnh
+
+    const current = L.latLng(e.latitude, e.longitude);
+    if (!lastLatLng || current.distanceTo(lastLatLng) > 5) {
+        lastLatLng = current;
+        $('#geoy-input').val(e.latitude);
+        $('#geox-input').val(e.longitude);
+        marker.setLatLng(current);
+        map.setView(current, 18);
+    }
+
+    if (!isManualPosition) {
+        const current = L.latLng(e.latitude, e.longitude);
+        lastLatLng = current;
+
+        // Cập nhật vào form
+        $('#geoy-input').val(e.latitude);
+        $('#geox-input').val(e.longitude);
+
+        // Cập nhật vị trí marker
+        marker.setLatLng(current);
+
+        // Đưa map về vị trí
+        map.setView(current, 18);
+    }
+});
+
+// const gpsButton = L.control({ position: 'topleft' });
+
+// gpsButton.onAdd = function(map) {
+//     const btn = L.DomUtil.create('button', 'leaflet-bar leaflet-control leaflet-control-custom');
+//     btn.innerHTML = '📍';
+//     btn.title = 'Quay lại vị trí hiện tại';
+//     btn.style.backgroundColor = 'white';
+//     btn.style.width = '34px';
+//     btn.style.height = '34px';
+//     btn.style.cursor = 'pointer';
+//     btn.style.fontSize = '18px';
+//     btn.style.lineHeight = '30px';
+//     btn.style.textAlign = 'center';
+//     btn.style.border = 'none';
+//     btn.style.boxShadow = '0 1px 5px rgba(0,0,0,0.65)';
+
+//     // Ngăn bản đồ bị kéo khi nhấn
+//     L.DomEvent.disableClickPropagation(btn);
+//     L.DomEvent.on(btn, 'click', function (e) {
+//         e.preventDefault();
+//         resetToGPS(); // gọi lại hàm định vị
+//     });
+
+//     return btn;
+// };
+
+// gpsButton.addTo(map);
+// // Hàm gọi lại định vị (có thể gọi từ nút ngoài)
+// function resetToGPS() {
+//     isManualPosition = false;
+//     map.locate({ setView: true, maxZoom: 18, enableHighAccuracy: true, watch: false });
+// }
+
+</script>
+

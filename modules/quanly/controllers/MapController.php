@@ -15,6 +15,11 @@ class MapController extends \app\modules\quanly\base\QuanlyBaseController
 {
     public $layout = '@app/views/layouts/map/main';
 
+    public function actionVuviec()
+    {   
+        return $this->render('vuviec');
+    }
+
     public function actionIndex()
     {
         $allVuViec = $this->getVuViecDataQuery()->asArray()->all();

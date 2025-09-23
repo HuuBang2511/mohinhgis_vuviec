@@ -145,8 +145,8 @@ class APPConfig
             [
                 'name' => 'Bản đồ',
                 'icon' => 'fa fa-map',
-                'url' => 'quanly/map',
-                'key'=>'quanly.map.index',
+                'url' => 'quanly/map/vuviec',
+                'key'=>'quanly.map.vuviec',
                 'hasChild' => false,
             ]
         ],

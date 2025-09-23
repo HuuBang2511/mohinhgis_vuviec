@@ -8,7 +8,11 @@ use yii\helpers\Html;
 <div class="ho-gia-dinh-update">
 
     <?= $this->render('_form', [
-        'model' => $model,
+        'hogiadinh' => $hogiadinh,
+        //'chuho' => $chuho,
+        'thanhviens' => $thanhviens,
+        'categories' => $categories,
+        'diachiNocgia' => $diachiNocgia,
     ]) ?>
 
 </div>

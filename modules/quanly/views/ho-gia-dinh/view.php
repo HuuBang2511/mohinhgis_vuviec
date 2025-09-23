@@ -105,7 +105,7 @@ $this->params['breadcrumbs'][] = $const['label']['view'];
                                         <td><?= ($congdan->gioitinh_id != null) ? $congdan->gioitinh->ten : '' ?></td>
                                         <td><?= $congdan->cccd ?></td>
                                         <td class="text-center">
-                                            <a class="btn btn-sm btn-primary" href="<?= Yii::$app->urlManager->createUrl(['app/congdan/view','id' => $congdan->id]) ?>"><i class="fa fa-eye"></i></a>
+                                            <a class="btn btn-sm btn-primary" href="<?= Yii::$app->urlManager->createUrl(['quanly/nguoi-dan/view','id' => $congdan->id]) ?>"><i class="fa fa-eye"></i></a>
                                             <!-- <a class="btn btn-sm btn-danger" href="<?= Yii::$app->homeUrl ?>administration/nocgia/delete-hogiadinh?id=<?= $congdan->id ?>" data-confirm="Xóa thông hộ gia khỏi nóc gia?"><i class="fa fa-trash"></i></a> -->
                                         </td>
                                     </tr>
