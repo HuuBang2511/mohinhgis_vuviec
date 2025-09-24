@@ -7,16 +7,16 @@ use app\widgets\gridview\GridView;
 use app\widgets\export\ExportMenu;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\quanly\models\NocGiaSearch */
+/* @var $searchModel app\modules\quanly\models\NguoiDanSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = (isset($const['title'])) ? $const['title'] : 'Nóc gia';
+$this->title = (isset($const['title'])) ? $const['title'] : 'Người dân';
 $this->params['breadcrumbs'][] = $this->title;
 
 CrudAsset::register($this);
 
 ?>
-<div class="noc-gia-index">
+<div class="nguoi-dan-index">
     <div id="ajaxCrudDatatable">
         <?php $fullExportMenu = ExportMenu::widget([
             'dataProvider' => $dataProvider,
@@ -50,7 +50,7 @@ CrudAsset::register($this);
                 $fullExportMenu,
                 ['content'=>
                     Html::a('<i class="fa fa-plus"></i> Thêm mới', ['create'],
-                    ['title'=> 'Thêm mới ','class'=>'btn btn-success'])
+                    ['role'=>'modal-remote','title'=> 'Thêm mới ','class'=>'btn btn-success'])
                 ],
             ],          
             'striped' => true,

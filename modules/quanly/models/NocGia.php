@@ -23,8 +23,6 @@ use Yii;
  * @property int|null $updated_by
  *
  * @property HoGiaDinh[] $hoGiaDinhs
- * @property Kp $khupho
- * @property Phuongxa $phuongxa
  */
 class NocGia extends QuanlyBaseModel
 {
@@ -46,8 +44,7 @@ class NocGia extends QuanlyBaseModel
             [['khupho_id', 'status', 'created_by', 'updated_by'], 'default', 'value' => null],
             [['khupho_id', 'status', 'created_by', 'updated_by'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['khupho_id'], 'exist', 'skipOnError' => true, 'targetClass' => Kp::className(), 'targetAttribute' => ['khupho_id' => 'OBJECTID']],
-            [['phuongxa_id'], 'exist', 'skipOnError' => true, 'targetClass' => Phuongxa::className(), 'targetAttribute' => ['phuongxa_id' => 'ma_dvhc']],
+            [['khupho_id', 'phuongxa_id'], 'required']
         ];
     }
 
@@ -84,14 +81,9 @@ class NocGia extends QuanlyBaseModel
         return $this->hasMany(HoGiaDinh::className(), ['nocgia_id' => 'id']);
     }
 
-    /**
-     * Gets query for [[Khupho]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
     public function getKhupho()
     {
-        return $this->hasOne(Kp::className(), ['OBJECTID' => 'khupho_id']);
+        return $this->hasOne(Kp::className(), ['id' => 'khupho_id']);
     }
 
     /**
@@ -101,6 +93,6 @@ class NocGia extends QuanlyBaseModel
      */
     public function getPhuongxa()
     {
-        return $this->hasOne(Phuongxa::className(), ['ma_dvhc' => 'phuongxa_id']);
+        return $this->hasOne(Phuongxa::className(), ['maXa' => 'phuongxa_id']);
     }
 }

@@ -35,11 +35,7 @@ class CategoriesService
     public static function getCategoriesNocgia(){
         $categories = [];
 
-        if(Yii::$app->user->identity->phuongxa !== null){
-            $categories['phuongxa'] = Phuongxa::find()->where(['ma_dvhc' => Yii::$app->user->identity->phuongxa])->orderBy('ten_dvhc')->asArray()->all();
-        }else{
-            $categories['phuongxa'] = Phuongxa::find()->orderBy('ten_dvhc')->asArray()->all();
-        }
+        $categories['phuongxa'] = Phuongxa::find()->orderBy('tenXa')->asArray()->all();
 
         return $categories;
     }
@@ -68,9 +64,9 @@ class CategoriesService
         }
 
         if(Yii::$app->user->identity->phuongxa !== null){
-            $categories['phuongxa'] = Phuongxa::find()->where(['ma_dvhc' => Yii::$app->user->identity->phuongxa])->orderBy('ten_dvhc')->asArray()->all();
+            $categories['phuongxa'] = Phuongxa::find()->where(['maXa' => Yii::$app->user->identity->phuongxa])->orderBy('maXa')->asArray()->all();
         }else{
-            $categories['phuongxa'] = Phuongxa::find()->orderBy('ten_dvhc')->asArray()->all();
+            $categories['phuongxa'] = Phuongxa::find()->orderBy('maXa')->asArray()->all();
         }
 
         $categories['trangthaixuly'] = TrangThaiXuLy::find()->where(['status' => 1])->orderBy('ten_trang_thai')->asArray()->all();

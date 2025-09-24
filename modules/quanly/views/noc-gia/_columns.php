@@ -23,11 +23,13 @@ return [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'khupho_id',
         'value' => 'khupho.TenKhuPho',
+        'filter' => false,
     ],
     [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'phuongxa_id',
-        'value' => 'phuongxa.ten_dvhc'
+        'value' => 'phuongxa.tenXa',
+        'filter' => false,
     ],
     [
         'class'=>'\kartik\grid\DataColumn',

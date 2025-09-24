@@ -9,20 +9,19 @@ use yii\db\Expression;
 /**
  * This is the model class for table "kp".
  *
- * @property int $OBJECTID
+ * @property int $id
  * @property string|null $geom
+ * @property float|null $OBJECTID
  * @property string|null $TenPhuong
  * @property string|null $TenQuan
  * @property string|null $TenKhuPho
  * @property float|null $MaQuan
  * @property string|null $MaPhuong
- * @property float|null $Shape_Length
+ * @property float|null $Shape_Leng
  * @property float|null $Shape_Area
  * @property string|null $mv_dvhc
- *
- * @property Phuongxa $phuongXa
  */
-class Kp extends ActiveRecord
+class Kp extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -32,12 +31,9 @@ class Kp extends ActiveRecord
         return 'kp';
     }
 
-    /**
-     * Khai báo rõ ràng khóa chính của bảng
-     */
     public static function primaryKey()
     {
-        return ['OBJECTID'];
+        return ['id'];
     }
 
     /**
@@ -46,14 +42,10 @@ class Kp extends ActiveRecord
     public function rules()
     {
         return [
-            [['OBJECTID'], 'required'],
-            [['OBJECTID'], 'integer'],
             [['geom'], 'string'],
-            [['MaQuan', 'Shape_Length', 'Shape_Area'], 'number'],
+            [['OBJECTID', 'MaQuan', 'Shape_Leng', 'Shape_Area'], 'number'],
             [['TenPhuong', 'TenQuan', 'TenKhuPho', 'MaPhuong'], 'string', 'max' => 50],
-            [['mv_dvhc'], 'string', 'max' => 255],
-            [['OBJECTID'], 'unique'],
-            [['mv_dvhc'], 'exist', 'skipOnError' => true, 'targetClass' => Phuongxa::class, 'targetAttribute' => ['mv_dvhc' => 'ma_dvhc']],
+            [['mv_dvhc'], 'string', 'max' => 254],
         ];
     }
 
@@ -63,27 +55,23 @@ class Kp extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'OBJECTID' => 'ID Khu phố',
-            'geom' => 'Dữ liệu không gian',
-            'TenPhuong' => 'Tên Phường',
-            'TenQuan' => 'Tên Quận',
-            'TenKhuPho' => 'Tên Khu phố',
-            'MaQuan' => 'Mã Quận',
-            'MaPhuong' => 'Mã Phường',
-            'Shape_Length' => 'Chu vi',
-            'Shape_Area' => 'Diện tích',
-            'mv_dvhc' => 'Mã ĐVHC Phường/Xã',
+            'id' => 'ID',
+            'geom' => 'Geom',
+            'OBJECTID' => 'Objectid',
+            'TenPhuong' => 'Ten Phuong',
+            'TenQuan' => 'Ten Quan',
+            'TenKhuPho' => 'Ten Khu Pho',
+            'MaQuan' => 'Ma Quan',
+            'MaPhuong' => 'Ma Phuong',
+            'Shape_Leng' => 'Shape Leng',
+            'Shape_Area' => 'Shape Area',
+            'mv_dvhc' => 'Mv Dvhc',
         ];
     }
 
-    /**
-     * Gets query for [[Phuongxa]].
-     * Đổi tên hàm cho rõ nghĩa
-     * @return \yii\db\ActiveQuery
-     */
     public function getPhuongXa()
     {
-        return $this->hasOne(Phuongxa::class, ['ma_dvhc' => 'mv_dvhc']);
+        return $this->hasOne(Phuongxa::class, ['maXa' => 'mv_dvhc']);
     }
 
     /**

@@ -17,27 +17,10 @@ class DashboardController extends QuanlyBaseController
 {
     public function actionIndex()
     {
-        if((Yii::$app->user->identity->is_nguoidan || Yii::$app->user->identity->canbo_id != null)){
-            $this->redirect(['vu-viec/index']);
-        }
-
-        // if(Yii::$app->user->identity->captaikhoan != null && Yii::$app->user->identity->captaikhoan == 1){
-        //     $this->redirect(['map/index']);
-        // }
-
-        // Lấy dữ liệu ban đầu cho lần tải trang đầu tiên
-        $initialData = $this->getDashboardData();
-
-        // MỚI: Lấy danh sách phường xã cho bộ lọc
-        $phuongXaList = ArrayHelper::map(Phuongxa::find()->orderBy('ten_dvhc')->asArray()->all(), 'ma_dvhc', 'ten_dvhc');
-
-        if(Yii::$app->user->identity->phuongxa != null){
-            $phuongXaList = ArrayHelper::map(Phuongxa::find()->where(['ma_dvhc' => Yii::$app->user->identity->phuongxa])->orderBy('ten_dvhc')->asArray()->all(), 'ma_dvhc', 'ten_dvhc');
-        }
+       
 
         return $this->render('index', [
-            'initialDataJson' => Json::encode($initialData),
-            'phuongXaList' => $phuongXaList, // MỚI: Truyền danh sách sang view
+            
         ]);
     }
 

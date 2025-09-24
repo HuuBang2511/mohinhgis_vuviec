@@ -120,6 +120,21 @@ class QuanlyBaseModel extends ActiveRecord
                 ->bindValue(':id', $this->id)
                 ->execute();
         }
+
+        if ($this->formName() == 'DiemNhayCam' && $this->long != null){
+            $tableName = $this->tableName();
+            \Yii::$app->db->createCommand("UPDATE $tableName SET geom = ST_SetSRID(ST_MakePoint($this->long,$this->lat),4326) WHERE id=:id")
+                ->bindValue(':id', $this->id)
+                ->execute();
+        }
+
+        if ($this->formName() == 'DiemTrongDiem' && $this->long != null){
+            $tableName = $this->tableName();
+            \Yii::$app->db->createCommand("UPDATE $tableName SET geom = ST_SetSRID(ST_MakePoint($this->long,$this->lat),4326) WHERE id=:id")
+                ->bindValue(':id', $this->id)
+                ->execute();
+        }
+        
        parent::afterSave($insert, $changedAttributes);
     }
 

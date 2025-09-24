@@ -22,7 +22,7 @@ $controller = $requestedAction->controller;
 $label = $controller->label;
 
 $this->title = Yii::t('app', $label[$requestedAction->id] . ' ' . $controller->title);
-$this->params['breadcrumbs'][] = ['label' => $label['index'] . ' ' . $controller->title, 'url' => Yii::$app->urlManager->createUrl(['quanly/noc-gia/index'])];
+$this->params['breadcrumbs'][] = ['label' => $label['index'] . ' ' . $controller->title, 'url' => Yii::$app->urlManager->createUrl(['quanly/diem-nhay-cam/index'])];
 $this->params['breadcrumbs'][] = $this->title;
 
 
@@ -49,35 +49,20 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="block-content">
 
         <div class="row mt-3">
-            <div class="col-lg-3">
-                <?= $form->field($model, 'so_nha')->input('text') ?>
+            <div class="col-lg-12">
+                <?= $form->field($model, 'tenloaihinh')->input('text') ?>
             </div>
-            <div class="col-lg-3">
-                <?= $form->field($model, 'ten_duong')->input('text') ?>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg-12">
+                <?= $form->field($model, 'thongtin')->textarea(['rows' => 2]) ?>
             </div>
-            <div class="col-lg-3">
-                <?= $form->field($model, 'phuongxa_id')->widget(Select2::className(), [
-                        'data' => ArrayHelper::map($categories['phuongxa'], 'maXa', 'tenXa'),
-                        'options' => ['prompt' => 'Chọn phường xã', 'id' => 'phuongxa-id'],
-                        'pluginOptions' => [
-                            'allowClear' => true
-                        ],
-                ]) ?>
-            </div>
-            <div class="col-lg-3">
-                <?= $form->field($model, 'khupho_id')->widget(DepDrop::class, [
-                                'options'=>['id'=>'khupho-id'],
-                                'type' => DepDrop::TYPE_SELECT2,
-                                'select2Options' => ['pluginOptions' => ['allowClear' => true,]],
-                                'pluginOptions'=>[
-                                    'depends'=>['phuongxa-id'],
-                                    'initialize' => true,
-                                    'placeholder'=>'Chọn khu phố',
-                                    'url'=>Url::to(['../quanly/ajax-data/get-khupho']),
-                                    'allowClear' => true
-                                    
-                    ]
-                ]) ?>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg-12">
+                <?= $form->field($model, 'ghichu')->textarea(['rows' => 2]) ?>
             </div>
         </div>
 

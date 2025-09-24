@@ -17,7 +17,8 @@ use app\modules\services\UtilityService;
 use app\modules\quanly\models\NguoiDan;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
-
+use app\modules\quanly\models\VHogiadinh;
+use app\modules\quanly\models\VHogiadinhSearch;
 /**
  * HoGiaDinhController implements the CRUD actions for HoGiaDinh model.
  */
@@ -56,7 +57,7 @@ class HoGiaDinhController extends \app\modules\quanly\base\QuanlyBaseController
      */
     public function actionIndex()
     {
-        $searchModel = new HoGiaDinhSearch();
+        $searchModel = new VHogiadinhSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

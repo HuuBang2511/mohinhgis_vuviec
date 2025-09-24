@@ -123,7 +123,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'ma_dvhc_phuongxa',
                         'value' => function($model) {
-                            return $model->phuongXa ? $model->phuongXa->ten_dvhc : null;
+                            return $model->phuongXa ? $model->phuongXa->tenXa : null;
                         }
                     ],
                     [

@@ -3,31 +3,55 @@
 namespace app\modules\quanly\controllers;
 
 use Yii;
-use app\modules\quanly\models\NocGia;
-use app\modules\quanly\models\NocGiaSearch;
+use app\modules\quanly\models\NguoiDan;
+use app\modules\quanly\models\NguoiDanSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use \yii\web\Response;
 use yii\helpers\Html;
 use app\modules\services\CategoriesService;
-use app\modules\quanly\models\Hogiadinh;
+use app\modules\quanly\models\ThongtinCutru;
 
 /**
- * NocGiaController implements the CRUD actions for NocGia model.
+ * NguoiDanController implements the CRUD actions for NguoiDan model.
  */
-class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
+class NguoiDanController extends \app\modules\quanly\base\QuanlyBaseController
 {
 
-    public $title = "Nóc gia";
+    public $title = "Người dân";
+    public $const;
+    public function init()
+    {
+        parent::init();
+        $this->const = [
+            'title' => 'Người dân',
+            'label' => [
+                'index' => 'Danh sách',
+                'create' => 'Thêm mới',
+                'update' => 'Cập nhật',
+                'view' => 'Thông tin chi tiết',
+                'statistic' => 'Thống kê',
+                
+            ],
+            'url' => [
+                'index' => 'index',
+                'create' => 'Thêm mới',
+                'update' => 'Cập nhật',
+                'view' => 'Thông tin chi tiết',
+                'statistic' => 'Thống kê',
+            
+            ],
+        ];
+    }
 
     /**
-     * Lists all NocGia models.
+     * Lists all NguoiDan models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new NocGiaSearch();
+        $searchModel = new NguoiDanSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -38,7 +62,7 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
 
 
     /**
-     * Displays a single NocGia model.
+     * Displays a single NguoiDan model.
      * @param integer $id
      * @return mixed
      */
@@ -46,44 +70,53 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
     {
         $request = Yii::$app->request;
 
-        $hogiadinhs = Hogiadinh::find()->where(['nocgia_id' => $id, 'status' => 1])->all();
+       
+        $thongtinLienquan['cutru'] = ThongtinCutru::find()->where(['status' => 1, 'nguoidan_id' => $id])->all();
+        
+        
+        //dd($thongtinLienquan['tochuc'][0]->loaitochuc);
 
         return $this->render('view', [
             'model' => $this->findModel($id),
-            'hogiadinhs' => $hogiadinhs
+            'thongtinLienquan' => $thongtinLienquan,
         ]);
     }
 
     /**
-     * Creates a new NocGia model.
+     * Creates a new NguoiDan model.
      * For ajax request will return json object
      * and for non-ajax request if creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($id = null)
     {
-    
         $request = Yii::$app->request;
-        $model = new Nocgia();
 
-        //dd(CategoriesService::getCategoriesNocgia());
-
+        if($id != null){
+            $model = new NguoiDan(['hogiadinh_id' => $id]);
+        }else{
+            $model = new NguoiDan();
+        }
+       
         if($model->load($request->post())){
+
             $model->save();
 
-            return $this->redirect(['view', 'id' => $model->id]);
+            $model->dia_chi = $model->hogiadinh->nocgia->so_nha.', '.$model->hogiadinh->nocgia->ten_duong.', '.$model->hogiadinh->nocgia->khupho->TenKhuPho.', '.$model->hogiadinh->nocgia->phuongxa->tenXa;
+
+            $model->save();
+            
+            return $this->redirect(['ho-gia-dinh/view', 'id' => $model->hogiadinh_id]);
         }
-
-
+        
         return $this->render('create', [
             'model' => $model,
-            'categories' => CategoriesService::getCategoriesNocgia(),
+            'categories' => CategoriesService::getCategoriesCongdan(),
         ]);
-
     }
 
     /**
-     * Updates an existing NocGia model.
+     * Updates an existing NguoiDan model.
      * For ajax request will return json object
      * and for non-ajax request if update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
@@ -95,19 +128,20 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
         $model = $this->findModel($id);
 
         if($model->load($request->post())){
+            $model->dia_chi = $model->hogiadinh->nocgia->so_nha.', '.$model->hogiadinh->nocgia->ten_duong.', '.$model->hogiadinh->nocgia->khupho->TenKhuPho.', '.$model->hogiadinh->nocgia->phuongxa->tenXa;
             $model->save();
-
-            return $this->redirect(['view', 'id' => $model->id]);
+            
+            return $this->redirect(['ho-gia-dinh/view', 'id' => $model->hogiadinh_id]);
         }
 
         return $this->render('update', [
             'model' => $model,
-            'categories' => CategoriesService::getCategoriesNocgia(),
+            'categories' => CategoriesService::getCategoriesCongdan(),
         ]);
     }
 
     /**
-     * Delete an existing NocGia model.
+     * Delete an existing NguoiDan model.
      * For ajax request will return json object
      * and for non-ajax request if deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
@@ -126,7 +160,7 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
             Yii::$app->response->format = Response::FORMAT_JSON;
             if($request->isGet){
                 return [
-                    'title'=> "Xóa NocGia #".$id,
+                    'title'=> "Xóa người dân #".$id,
                     'content'=>$this->renderAjax('delete', [
                         'model' => $model,
                     ]),
@@ -136,7 +170,7 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
             }else if($request->isPost && $model->save()){
                 return [
                     'forceReload'=>'#crud-datatable-pjax',
-                    'title'=> "NocGia #".$id,
+                    'title'=> "người dân #".$id,
                     'content'=>$this->renderAjax('view', [
                         'model' => $model,
                     ]),
@@ -145,7 +179,7 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
                 ];
             }else{
                 return [
-                    'title'=> "Update NocGia #".$id,
+                    'title'=> "Update người dân #".$id,
                     'content'=>$this->renderAjax('delete', [
                         'model' => $model,
                     ]),
@@ -170,15 +204,15 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
 
     
     /**
-     * Finds the NocGia model based on its primary key value.
+     * Finds the NguoiDan model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return NocGia the loaded model
+     * @return NguoiDan the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = NocGia::findOne($id)) !== null) {
+        if (($model = NguoiDan::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

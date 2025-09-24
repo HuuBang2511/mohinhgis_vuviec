@@ -3,31 +3,29 @@
 namespace app\modules\quanly\controllers;
 
 use Yii;
-use app\modules\quanly\models\NocGia;
-use app\modules\quanly\models\NocGiaSearch;
+use app\modules\quanly\models\DiemNhayCam;
+use app\modules\quanly\models\DiemNhayCamSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use \yii\web\Response;
 use yii\helpers\Html;
-use app\modules\services\CategoriesService;
-use app\modules\quanly\models\Hogiadinh;
 
 /**
- * NocGiaController implements the CRUD actions for NocGia model.
+ * DiemNhayCamController implements the CRUD actions for DiemNhayCam model.
  */
-class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
+class DiemNhayCamController extends \app\modules\quanly\base\QuanlyBaseController
 {
 
-    public $title = "Nóc gia";
+    public $title = "Điểm nhạy cảm";
 
     /**
-     * Lists all NocGia models.
+     * Lists all DiemNhayCam models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new NocGiaSearch();
+        $searchModel = new DiemNhayCamSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -38,7 +36,7 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
 
 
     /**
-     * Displays a single NocGia model.
+     * Displays a single DiemNhayCam model.
      * @param integer $id
      * @return mixed
      */
@@ -46,25 +44,24 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
     {
         $request = Yii::$app->request;
 
-        $hogiadinhs = Hogiadinh::find()->where(['nocgia_id' => $id, 'status' => 1])->all();
+        //$hogiadinhs = Hogiadinh::find()->where(['nocgia_id' => $id, 'status' => 1])->all();
 
         return $this->render('view', [
             'model' => $this->findModel($id),
-            'hogiadinhs' => $hogiadinhs
+            //'hogiadinhs' => $hogiadinhs
         ]);
     }
 
     /**
-     * Creates a new NocGia model.
+     * Creates a new DiemNhayCam model.
      * For ajax request will return json object
      * and for non-ajax request if creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-    
         $request = Yii::$app->request;
-        $model = new Nocgia();
+        $model = new DiemNhayCam();
 
         //dd(CategoriesService::getCategoriesNocgia());
 
@@ -77,13 +74,13 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
 
         return $this->render('create', [
             'model' => $model,
-            'categories' => CategoriesService::getCategoriesNocgia(),
+            //'categories' => CategoriesService::getCategoriesNocgia(),
         ]);
 
     }
 
     /**
-     * Updates an existing NocGia model.
+     * Updates an existing DiemNhayCam model.
      * For ajax request will return json object
      * and for non-ajax request if update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
@@ -102,12 +99,12 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
 
         return $this->render('update', [
             'model' => $model,
-            'categories' => CategoriesService::getCategoriesNocgia(),
+            //'categories' => CategoriesService::getCategoriesNocgia(),
         ]);
     }
 
     /**
-     * Delete an existing NocGia model.
+     * Delete an existing DiemNhayCam model.
      * For ajax request will return json object
      * and for non-ajax request if deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
@@ -126,7 +123,7 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
             Yii::$app->response->format = Response::FORMAT_JSON;
             if($request->isGet){
                 return [
-                    'title'=> "Xóa NocGia #".$id,
+                    'title'=> "Xóa DiemNhayCam #".$id,
                     'content'=>$this->renderAjax('delete', [
                         'model' => $model,
                     ]),
@@ -136,7 +133,7 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
             }else if($request->isPost && $model->save()){
                 return [
                     'forceReload'=>'#crud-datatable-pjax',
-                    'title'=> "NocGia #".$id,
+                    'title'=> "DiemNhayCam #".$id,
                     'content'=>$this->renderAjax('view', [
                         'model' => $model,
                     ]),
@@ -145,7 +142,7 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
                 ];
             }else{
                 return [
-                    'title'=> "Update NocGia #".$id,
+                    'title'=> "Update DiemNhayCam #".$id,
                     'content'=>$this->renderAjax('delete', [
                         'model' => $model,
                     ]),
@@ -170,15 +167,15 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
 
     
     /**
-     * Finds the NocGia model based on its primary key value.
+     * Finds the DiemNhayCam model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return NocGia the loaded model
+     * @return DiemNhayCam the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = NocGia::findOne($id)) !== null) {
+        if (($model = DiemNhayCam::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

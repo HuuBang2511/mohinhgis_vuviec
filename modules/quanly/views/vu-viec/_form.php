@@ -195,7 +195,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <div class="col-lg-3">
                             <?= $form->field($model, 'ma_dvhc_phuongxa')->widget(Select2::class, [
-                                'data' => ArrayHelper::map($categories['phuongxa'], 'ma_dvhc', 'ten_dvhc'),                          
+                                'data' => ArrayHelper::map($categories['phuongxa'], 'maXa', 'tenXa'),                          
                                 'options' => ['prompt' => 'Chọn phường xã', 'id' => 'phuongxa-id', 'class' =>'required-field',],
                                 'pluginOptions' => [
                                     'allowClear' => true

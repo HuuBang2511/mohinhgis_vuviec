@@ -85,11 +85,11 @@ class AjaxDataController extends Controller{
                 $query = new Query;
 
                 $query->select([
-                    'OBJECTID as id',
-                    "('Phường cũ: ' || \"TenPhuong\" || ', Khu phố: ' || \"TenKhuPho\") as name"
+                    'id as id',
+                    "TenKhuPho as name"
                 ])
                 ->from('kp')
-                ->andWhere(['mv_dvhc' => $phuongxa_id])
+                ->andWhere(['MaPhuong' => $phuongxa_id])
                 ->orderBy('TenKhuPho');
                 $command = $query->createCommand();
                 $data = $command->queryAll();

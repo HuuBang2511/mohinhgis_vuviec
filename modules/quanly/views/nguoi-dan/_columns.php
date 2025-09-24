@@ -13,15 +13,27 @@ return [
     // ],
     [
         'class'=>'\kartik\grid\DataColumn',
-        'attribute'=>'ma_hsct',
+        'attribute'=>'ho_ten',
     ],
     [
         'class'=>'\kartik\grid\DataColumn',
-        'attribute'=>'diachi_nocgia',
+        'attribute'=>'dia_chi',
+    ],
+    [
+        'class'=>'\kartik\grid\DataColumn',
+        'attribute'=>'so_dien_thoai',
     ],
     // [
     //     'class'=>'\kartik\grid\DataColumn',
-    //     'attribute'=>'loaicutru_id',
+    //     'attribute'=>'email',
+    // ],
+    // [
+    //     'class'=>'\kartik\grid\DataColumn',
+    //     'attribute'=>'nhom_doi_tuong',
+    // ],
+    // [
+        // 'class'=>'\kartik\grid\DataColumn',
+        // 'attribute'=>'gioitinh_id',
     // ],
     // [
         // 'class'=>'\kartik\grid\DataColumn',
@@ -32,12 +44,36 @@ return [
         // 'attribute'=>'updated_at',
     // ],
     // [
-    //     'class'=>'\kartik\grid\DataColumn',
-    //     'attribute'=>'created_by',
+        // 'class'=>'\kartik\grid\DataColumn',
+        // 'attribute'=>'created_by',
     // ],
     // [
-    //     'class'=>'\kartik\grid\DataColumn',
-    //     'attribute'=>'updated_by',
+        // 'class'=>'\kartik\grid\DataColumn',
+        // 'attribute'=>'updated_by',
+    // ],
+    // [
+        // 'class'=>'\kartik\grid\DataColumn',
+        // 'attribute'=>'hogiadinh_id',
+    // ],
+    // [
+        // 'class'=>'\kartik\grid\DataColumn',
+        // 'attribute'=>'loaicutru_id',
+    // ],
+    // [
+        // 'class'=>'\kartik\grid\DataColumn',
+        // 'attribute'=>'cccd',
+    // ],
+    // [
+        // 'class'=>'\kartik\grid\DataColumn',
+        // 'attribute'=>'cccd_ngaycap',
+    // ],
+    // [
+        // 'class'=>'\kartik\grid\DataColumn',
+        // 'attribute'=>'cccd_noicap',
+    // ],
+    // [
+        // 'class'=>'\kartik\grid\DataColumn',
+        // 'attribute'=>'quanhechuho_id',
     // ],
     // [
         // 'class'=>'\kartik\grid\DataColumn',

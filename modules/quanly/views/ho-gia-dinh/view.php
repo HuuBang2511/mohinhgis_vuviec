@@ -71,7 +71,7 @@ $this->params['breadcrumbs'][] = $const['label']['view'];
                             
                                 <tr>
                                     <th style="width:35%">Địa chỉ nóc gia</th>
-                                    <td><?= ($model->nocgia_id != null) ? $model->nocgia->so_nha.', '.$model->nocgia->ten_duong.', '.$model->nocgia->phuongxa->ten_dvhc : '' ?></td>
+                                    <td><?= ($model->nocgia_id != null) ? $model->nocgia->so_nha.', '.$model->nocgia->ten_duong.', '.$model->nocgia->phuongxa->tenXa : '' ?></td>
                                 </tr>
 
                                 <tr>
@@ -86,7 +86,8 @@ $this->params['breadcrumbs'][] = $const['label']['view'];
 
                 <div class="tab-pane" id="thongtincongdan-view">
                     <?php if (isset($congdans)) : ?>
-                        
+                        <a href="<?= Yii::$app->homeUrl ?>quanly/nguoi-dan/create?id=<?= $_GET['id'] ?>"
+                                class="btn  btn-success mb-3 float-end">Thêm mới người dân vào hộ</a>
                         <table class="table table-striped table-bordered">
                             <tr>
                                 <th>STT</th>

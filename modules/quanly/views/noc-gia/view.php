@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </tr>
                                 <tr>
                                     <th style="width:35%"><?= $model->getAttributeLabel('phuongxa_id')?></th>
-                                    <td><?= ($model->phuongxa_id != null) ? $model->phuongxa->ten_dvhc : '' ?></td>
+                                    <td><?= ($model->phuongxa_id != null) ? $model->phuongxa->tenXa : '' ?></td>
                                 </tr>
                                 
                             </table>
@@ -105,7 +105,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="tab-pane" id="thongtinhogiadinh-view">
                     <?php if (isset($hogiadinhs)) : ?>
-                        
+                        <a href="<?= Yii::$app->homeUrl ?>quanly/ho-gia-dinh/create?id=<?= $_GET['id'] ?>"
+                                class="btn  btn-success mb-3 float-end">Thêm mới hộ gia đình</a>
                         <table class="table table-striped table-bordered">
                             <tr>
                                 <th>STT</th>
@@ -118,7 +119,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <tr>
                                         <td><?= $i + 1 ?></td>
                                         <td><?= $hogiadinh->ma_hsct ?></td>
-                                        <td><?= ($hogiadinh->chuho != null) ? $hogiadinh->chuho->hoten : '' ?></td>
+                                        <td><?= ($hogiadinh->chuho != null) ? $hogiadinh->chuho->ho_ten : '' ?></td>
                                         <td class="text-center">
                                             <a class="btn btn-sm btn-primary" href="<?= Yii::$app->urlManager->createUrl(['quanly/ho-gia-dinh/view','id' => $hogiadinh->id]) ?>"><i class="fa fa-eye"></i></a>
                                             <!-- <a class="btn btn-sm btn-danger" href="<?= Yii::$app->homeUrl ?>administration/nocgia/delete-hogiadinh?id=<?= $hogiadinh->id ?>" data-confirm="Xóa thông hộ gia khỏi nóc gia?"><i class="fa fa-trash"></i></a> -->
@@ -153,8 +154,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <script type="module">
    
-    var map = L.map('map').setView([<?= ($model->long != null) ? $model->long : '10.763496612971204' ?>,
-        <?= ($model->lat != null) ? $model->lat : '106.6465187072754' ?>
+    var map = L.map('map').setView([<?= ($model->lat != null) ? $model->lat : '10.763496612971204' ?>,
+        <?= ($model->long != null) ? $model->long : '106.6465187072754' ?>
     ], 20);
 
 
@@ -193,7 +194,7 @@ $this->params['breadcrumbs'][] = $this->title;
     });
 
     <?php if ($model->lat != null && $model->long != null) : ?>
-    var marker = L.marker([<?= $model->long ?>, <?= $model->lat ?>], {
+    var marker = L.marker([<?= $model->lat ?>, <?= $model->long ?>], {
         'icon': icon,
     }).addTo(map);
     <?php endif; ?>

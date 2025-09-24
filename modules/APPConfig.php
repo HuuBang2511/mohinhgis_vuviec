@@ -133,6 +133,20 @@ class APPConfig
                 'key'=>'quanly.nguoi-dan.index',
                 'hasChild' => false,
             ],
+            [
+                'name' => 'Điểm nhạy cảm',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/diem-nhay-cam',
+                'key'=>'quanly.diem-nhay-cam.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Điểm trọng điểm',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/diem-trong-diem',
+                'key'=>'quanly.diem-trong-diem.index',
+                'hasChild' => false,
+            ],
         ],
         'map' => [
             // [
@@ -151,20 +165,20 @@ class APPConfig
             ]
         ],
         'danhmuc' => [
-            [
-                'name' => 'Lĩnh vực',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/linh-vuc',
-                'key'=>'quanly.linhvuc.index',
-                'hasChild' => false,
-            ],
-            [
-                'name' => 'Trạng thái',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/trang-thai-xu-ly',
-                'key'=>'quanly.trang-thai-xu-ly.index',
-                'hasChild' => false,
-            ]
+            // [
+            //     'name' => 'Lĩnh vực',
+            //     'icon' => 'fa fa-list',
+            //     'url' => 'quanly/linh-vuc',
+            //     'key'=>'quanly.linhvuc.index',
+            //     'hasChild' => false,
+            // ],
+            // [
+            //     'name' => 'Trạng thái',
+            //     'icon' => 'fa fa-list',
+            //     'url' => 'quanly/trang-thai-xu-ly',
+            //     'key'=>'quanly.trang-thai-xu-ly.index',
+            //     'hasChild' => false,
+            // ]
         ],
 
     ];

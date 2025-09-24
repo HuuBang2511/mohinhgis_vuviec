@@ -7,16 +7,16 @@ use app\widgets\gridview\GridView;
 use app\widgets\export\ExportMenu;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\quanly\models\NocGiaSearch */
+/* @var $searchModel app\modules\quanly\models\DiemTrongDiemSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = (isset($const['title'])) ? $const['title'] : 'Nóc gia';
+$this->title = (isset($const['title'])) ? $const['title'] : '';
 $this->params['breadcrumbs'][] = $this->title;
 
 CrudAsset::register($this);
 
 ?>
-<div class="noc-gia-index">
+<div class="diem-trong-diem-index">
     <div id="ajaxCrudDatatable">
         <?php $fullExportMenu = ExportMenu::widget([
             'dataProvider' => $dataProvider,

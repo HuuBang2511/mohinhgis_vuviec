@@ -202,7 +202,7 @@ class VuViec extends QuanlyBaseModel
 
     public function getKhupho()
     {
-        return $this->hasOne(Kp::class, ['OBJECTID' => 'objectid_khupho']);
+        return $this->hasOne(Kp::class, ['id' => 'objectid_khupho']);
     }
 
     public function getTrangThaiHienTai()
@@ -226,7 +226,7 @@ class VuViec extends QuanlyBaseModel
      */
     public function getPhuongXa()
     {
-        return $this->hasOne(Phuongxa::class, ['ma_dvhc' => 'ma_dvhc_phuongxa']);
+        return $this->hasOne(Phuongxa::class, ['maXa' => 'ma_dvhc_phuongxa']);
     }
 
     //================================================================
