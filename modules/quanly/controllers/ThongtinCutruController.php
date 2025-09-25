@@ -96,7 +96,7 @@ class ThongtinCutruController extends \app\modules\quanly\base\QuanlyBaseControl
 
             $model->save();
             
-            return $this->redirect(['nguoi-dan/view', 'id' => $model->congdan_id]);
+            return $this->redirect(['nguoi-dan/view', 'id' => $model->nguoidan_id]);
         }
 
         return $this->render('update', [
