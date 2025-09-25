@@ -49,6 +49,10 @@ $this->params['breadcrumbs'][] = $const['label']['view'];
                                     <td><?= $model->ho_ten?></td>
                                 </tr>
                                 <tr>
+                                    <th style="width:35%"><?= $model->getAttributeLabel('ngaysinh')?></th>
+                                    <td><?= $model->ngaysinh?></td>
+                                </tr>
+                                <tr>
                                     <th style="width:35%"><?= $model->getAttributeLabel('so_dien_thoai')?></th>
                                     <td><?= $model->so_dien_thoai?></td>
                                 </tr>
@@ -87,6 +91,7 @@ $this->params['breadcrumbs'][] = $const['label']['view'];
                     <?php if (isset($thongtinLienquan['cutru'])) : ?>
                         <div class="row">
                             <div class="col-md-12">
+                                <?= Html::a('Thêm mới thông tin cư trú', ['thongtin-cutru/create', 'id' => $model->id], ['class' => 'btn btn-success mb-3 float-end']) ?>
                                 <table class="table table-bordered">
                                     <tr>
                                         <th>STT</th>
@@ -96,7 +101,7 @@ $this->params['breadcrumbs'][] = $const['label']['view'];
                                         <th>Địa chỉ thường trú</th>
                                         <th>Địa chỉ cư trú</th>
                                         <th>Địa chỉ tạm trú</th>
-                                        
+                                        <th></th>
                                     </tr>
                                     <?php if ($thongtinLienquan['cutru'] != null) : ?>
                                         <?php foreach ($thongtinLienquan['cutru'] as $i => $item) : ?>
@@ -105,15 +110,17 @@ $this->params['breadcrumbs'][] = $const['label']['view'];
                                                 <td><?= ($item->loaicutru_id != null) ? $item->loaicutru->ten : '' ?></td>
                                                 <td><?= ($item->ngaybatdau != null) ? $item->ngaybatdau : '' ?></td>
                                                 <td><?= ($item->ngayketthuc != null) ? $item->ngayketthuc : '' ?></td>
-                                                <td><?= ($item->diachi_thuongtru != null) ? $item->ngay_chuyediachi_thuongtru : '' ?></td>
+                                                <td><?= ($item->diachi_thuongtru != null) ? $item->diachi_thuongtru : '' ?></td>
                                                 <td><?= ($item->diachi_cutru != null) ? $item->diachi_cutru : '' ?></td>
                                                 <td><?= ($item->diachi_tamtru != null) ? $item->diachi_tamtru : '' ?></td>
-                                                
+                                                <td class="text-center">
+                                                <?= Html::a('<i class="fa fa-eye"></i>', ['thongtin-cutru/view', 'id' => $item->id], ['class' => 'btn btn-block btn-primary ']) ?>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="7">Không có dữ liệu</td>
+                                            <td colspan="8">Không có dữ liệu</td>
                                         </tr>
                                     <?php endif; ?>
                                 </table>

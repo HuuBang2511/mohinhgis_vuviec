@@ -1,25 +1,22 @@
 <?php
 
+use yii\bootstrap5\Modal;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
-use yii\grid\GridView;
-use yii\data\ArrayDataProvider;
-use app\widgets\maps\LeafletMap;
-use app\widgets\maps\layers\Marker;
-use app\widgets\maps\types\LatLng;
-use app\widgets\maps\types\Point;
-use app\widgets\maps\types\Icon;
-use app\widgets\maps\controls\Layers;
-use app\widgets\maps\controls\Scale;
-use app\modules\services\MapService;
-use app\widgets\maps\LeafletMapAsset;
+use yii\helpers\Url;
 use app\widgets\crud\CrudAsset;
+use yii\grid\GridView;
+use app\modules\services\UtilityService;
+use yii\widgets\DetailView;
+use app\widgets\maps\LeafletMapAsset;
+use yii\data\ArrayDataProvider;
+use app\widgets\maps\plugins\leafletlocate\LeafletLocateAsset;
 
 LeafletMapAsset::register($this);
+LeafletLocateAsset::register($this);
 CrudAsset::register($this);
 
-use yii\bootstrap5\Modal;
-use app\modules\services\UtilityService;
+
+
 
 use app\widgets\maps\layers\TileLayer;
 
@@ -30,6 +27,11 @@ $this->params['breadcrumbs'][] = ['label' => 'Danh sách vụ việc', 'url' => 
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
+
+<!-- CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+<!-- JS -->
+<script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
 
 <style>
 .card-custom {
@@ -55,6 +57,14 @@ $this->params['breadcrumbs'][] = $this->title;
 }
 .detail-view td {
     background: #fff;
+}
+</style>
+
+<style>
+#map {
+    width: 100%;
+    height: 50vh;
+    border: 1px solid #0665d0
 }
 </style>
 
@@ -118,8 +128,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $model->is_lap_lai ? 'Có' : 'Không';
                         }
                     ],
-                    'diem_rui_ro',
-                    'muc_do_canh_bao',
+                    
                     [
                         'attribute' => 'ma_dvhc_phuongxa',
                         'value' => function($model) {
@@ -243,52 +252,81 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="card-custom">
         <div class="card-header">Vị trí sự việc</div>
         <div class="card-body">
-            <?php
-            $center = new LatLng([
-                'lat' => ($model->lat != null) ? $model->lat : 10.770178,
-                'lng' => ($model->long != null) ? $model->long : 106.668657
-            ]);
-            $marker = new Marker([
-                'latLng' => $center,
-                'icon' => new Icon([
-                    'iconUrl' => 'https://auth.hcmgis.vn/uploads/icon/icons8-map-marker-96.png',
-                    'iconSize' => new Point(['x' => 40, 'y' => 40]),
-                    'iconAnchor' => new Point(['x' => 20, 'y' => 40]),
-                ]),
-            ]);
-
-            $hcmgis_layer = new TileLayer([
-                'urlTemplate' => 'https://thuduc-maps.hcmgis.vn/thuducserver/gwc/service/wmts?layer=thuduc:thuduc_maps&style=&tilematrixset=EPSG:900913&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/png&TileMatrix=EPSG:900913:{z}&TileCol={x}&TileRow={y}',
-                'layerName' => 'HCMGIS',
-                    'clientOptions' => [
-                    'layers' => 'thuduc:thuduc_maps'
-                ],
-            ]);
-
-            $osm_layer = new TileLayer([
-                'urlTemplate' => 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                'layerName' => 'OSM',
-                'clientOptions' => [
-                    'attribution' => '© OpenStreetMap contributors',
-                    'maxZoom' => 22,
-                ],
-            ]);
-
-            $leaflet = new LeafletMap([
-                'center' => $center, // set the center
-            ]);
-
-            $layers_control = new Layers();
-            $layers_control->setBaseLayers(MapService::createBaseMaps());
-            $leaflet->addControl($layers_control);
-            $leaflet->addLayer($marker);
-            $leaflet->addControl(new Scale());
-            $leaflet->addLayer($hcmgis_layer);
-
-            $leaflet->addLayer($hcmgis_layer)->addLayer($marker);
-
-            echo $leaflet->widget(['styleOptions' => ['height' => '450px']]);
-            ?>
+            <div id="map"></div>
         </div>
     </div>
 </div>
+
+<script type="module">
+   
+    var map = L.map('map').setView([<?= ($model->lat != null) ? $model->lat : '10.763496612971204' ?>,
+        <?= ($model->long != null) ? $model->long : '106.6465187072754' ?>
+    ], 20);
+
+
+    var layerGMapSatellite = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+
+    var layerGmapStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+
+
+    var baseLayers = {
+        "GGMap": layerGmapStreets,
+        "Vệ tinh": layerGMapSatellite,
+    };
+
+    
+    L.control.layers(baseLayers).addTo(map);
+    map.addLayer(layerGmapStreets, true);
+
+    var icon = L.icon({
+        iconUrl: 'https://auth.hcmgis.vn/uploads/icon/icons8-map-marker-96.png',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -48],
+    });
+
+    <?php if ($model->lat != null && $model->long != null) : ?>
+    var marker = L.marker([<?= $model->lat ?>, <?= $model->long ?>], {
+        'icon': icon,
+    }).addTo(map);
+    <?php endif; ?>
+
+    L.control.locate({
+        position: 'topleft',
+        flyTo: true,
+        keepCurrentZoomLevel: true,
+        drawCircle: false,
+        showPopup: false,
+        strings: {
+            title: "Định vị vị trí của bạn"
+        },
+        icon: 'fa fa-location-arrow', // nếu bạn dùng font-awesome
+        locateOptions: {
+            enableHighAccuracy: true,
+            maxZoom: 18,
+            watch: false
+        },
+        clickBehavior: {
+            inView: 'stop', 
+            outOfView: 'setView', 
+            inViewNotFollowing: 'setView'
+        }
+    }).addTo(map);
+
+    setTimeout(() => {
+        const btn = document.querySelector('.leaflet-control-locate a');
+        if (btn) {
+            btn.addEventListener('touchstart', function (e) {
+                e.preventDefault();
+                btn.click(); // kích hoạt click bằng touch
+            });
+        }
+    }, 1000);
+    
+</script>

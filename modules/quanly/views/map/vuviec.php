@@ -279,7 +279,7 @@ $this->params['hideHero'] = true;
     <div id="tabs">
         <div class="tabs-header">
             <a href="<?= Yii::$app->homeUrl ?>" target="_blank">
-                <img src="https://gis.nongdanviet.net/resources/images/logo_map.jpg" alt="Logo">
+                <img src="https://gis.nongdanviet.net/resources/images/logo_map_vuviec.jpg" alt="Logo">
             </a>
             <button id="back-to-map-mobile-btn"></button>
         </div>
@@ -332,8 +332,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const layerConfig = [
         { id: 'wmsDiemnhaycamLayer', wmsName: 'mohinhgis_pa05:diem_nhay_cam', displayName: 'Điểm nhạy cảm', defaultVisible: false, zIndex: 550, popupFields: {'tenloaihinh': 'Tên loại hình', 'thongtin': 'Thông tin', 'ghichu': 'Ghi chú'} },
         { id: 'wmsDiemtrongdiemLayer', wmsName: '	mohinhgis_pa05:diem_trong_diem', displayName: 'Điểm trọng điểm', defaultVisible: false, zIndex: 550, popupFields: {'tenloaihinh': 'Tên loại hình', 'thongtin': 'Thông tin', 'ghichu': 'Ghi chú'} },
-        { id: 'wmsKhuphoLayer', wmsName: '	mohinhgis_pa05:kp', displayName: 'Khu phố', defaultVisible: false, zIndex: 550, popupFields: {'TenKhuPho': 'Tên khu phố'} },
-        { id: 'wmsNocgiaLayer', wmsName: '	mohinhgis_pa05:noc_gia', displayName: 'Nóc gia', defaultVisible: false, zIndex: 550, popupFields: {'so_nha': 'Số nhà'} },
+        { id: 'wmsKhuphoLayer', wmsName: '	mohinhgis_pa05:kp', displayName: 'Khu phố', defaultVisible: false, zIndex: 450, popupFields: {'TenKhuPho': 'Tên khu phố'} },
+        { id: 'wmsNocgiaLayer', wmsName: '	mohinhgis_pa05:noc_gia', displayName: 'Nóc gia', defaultVisible: false, zIndex: 550, popupFields: {'so_nha': 'Số nhà', 'ten_duong' : 'Tên đường'} },
+        { id: 'wmsVuviecLayer', wmsName: '	mohinhgis_pa05:vu_viec', displayName: 'Vụ việc', defaultVisible: false, zIndex: 550, popupFields: {'ma_vu_viec': 'Mã vụ việc', 'tom_tat_noi_dung' : 'Tóm tắt nội dung', 'mo_ta_chi_tiet': 'Mô tả chi tiết'} },
     ];
 
     // --- MAP INITIALIZATION ---

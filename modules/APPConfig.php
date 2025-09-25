@@ -147,6 +147,20 @@ class APPConfig
                 'key'=>'quanly.diem-trong-diem.index',
                 'hasChild' => false,
             ],
+            [
+                'name' => 'Thông tin cư trú',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/thongtin-cutru',
+                'key'=>'quanly.thongtin-cutru.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Vụ việc',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/vu-viec',
+                'key'=>'quanly.vu-viec.index',
+                'hasChild' => false,
+            ],
         ],
         'map' => [
             // [

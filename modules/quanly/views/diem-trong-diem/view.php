@@ -89,11 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ], 18);
 
 
-    var hcmgis = L.tileLayer(
-        'https://thuduc-maps.hcmgis.vn/thuducserver/gwc/service/wmts?layer=thuduc:thuduc_maps&style=&tilematrixset=EPSG:900913&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/png&TileMatrix=EPSG:900913:{z}&TileCol={x}&TileRow={y}', {
-            maxZoom: 25,
-            minZoom: 13,
-    });
+    
 
     var layerGMapSatellite = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
         maxZoom: 20,
@@ -107,14 +103,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     var baseLayers = {
-        "HCMGIS": hcmgis,
+       
         "GGMap": layerGmapStreets,
         "Vệ tinh": layerGMapSatellite,
     };
 
     
     L.control.layers(baseLayers).addTo(map);
-    map.addLayer(hcmgis, true);
+    map.addLayer(layerGmapStreets, true);
 
     var icon = L.icon({
         iconUrl: 'https://auth.hcmgis.vn/uploads/icon/icons8-map-marker-96.png',

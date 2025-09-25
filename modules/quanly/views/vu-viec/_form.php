@@ -656,21 +656,17 @@ jQuery(".dynamicform_wrapper").on("afterInsert", function(e, item) {
 
 <script>
 var map = L.map('map').setView([
-    <?= ($model->lat != null) ? $model->lat : 10.763496612971204 ?>,
-    <?= ($model->long != null) ? $model->long : 106.6465187072754 ?>
+    <?= ($model->lat != null) ? $model->lat : 20.473381288809428 ?>,
+    <?= ($model->long != null) ? $model->long : 106.31907196809175 ?>
 ], 18);
 
 // Lớp nền
-var hcmgis = L.tileLayer(
-    'https://thuduc-maps.hcmgis.vn/thuducserver/gwc/service/wmts?layer=thuduc:thuduc_maps&style=&tilematrixset=EPSG:900913&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/png&TileMatrix=EPSG:900913:{z}&TileCol={x}&TileRow={y}', {
-        maxZoom: 25,
-        minZoom: 13,
-}).addTo(map);
+
 
 var googleMap = L.tileLayer('http://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
     maxZoom: 24,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-});
+}).addTo(map);
 
 var vetinh = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
     maxZoom: 24,
@@ -678,7 +674,7 @@ var vetinh = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', 
 });
 
 L.control.layers(
-    { "HCMGIS" : hcmgis ,"ggMap": googleMap, "Vệ tinh": vetinh },
+    {"ggMap": googleMap, "Vệ tinh": vetinh },
 ).addTo(map);
 
 // Tạo marker
@@ -693,8 +689,8 @@ let lastLatLng = null;
 let isManualPosition = false;
 
 const marker = new L.marker([
-    <?= ($model->lat != null) ? $model->lat : 10.763496612971204 ?>,
-    <?= ($model->long != null) ? $model->long : 106.6465187072754 ?>
+    <?= ($model->lat != null) ? $model->lat : 20.473381288809428 ?>,
+    <?= ($model->long != null) ? $model->long : 106.31907196809175 ?>
 ], {
     draggable: true,
     icon: icon,

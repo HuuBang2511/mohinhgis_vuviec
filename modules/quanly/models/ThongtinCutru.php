@@ -2,6 +2,7 @@
 
 namespace app\modules\quanly\models;
 use app\modules\quanly\base\QuanlyBaseModel;
+use app\modules\quanly\models\danhmuc\DmLoaicutru;
 use Yii;
 
 /**
@@ -40,7 +41,7 @@ class ThongtinCutru extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['ngaybatdau', 'ngayketthuc', 'created_at', 'updated_at'], 'safe'],
+            [['ngaybatdau', 'ngayketthuc', 'created_at', 'updated_at', 'ghichu'], 'safe'],
             [['loaicutru_id', 'nguoidan_id', 'status', 'created_by', 'updated_by'], 'default', 'value' => null],
             [['loaicutru_id', 'nguoidan_id', 'status', 'created_by', 'updated_by'], 'integer'],
             [['diachi_thuongtru', 'diachi_cutru', 'diachi_tamtru'], 'string'],
@@ -68,6 +69,7 @@ class ThongtinCutru extends QuanlyBaseModel
             'updated_at' => 'Updated At',
             'created_by' => 'Created By',
             'updated_by' => 'Updated By',
+            'ghichu' => 'Ghi chú',
         ];
     }
 

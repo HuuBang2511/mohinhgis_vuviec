@@ -95,10 +95,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         'formId' => 'dynamic-form',
                         'formFields' => [
                             'ho_ten',
-                            'ngay_sinh',
+                            'ngaysinh',
                             'gioitinh_id',
-                            'dantoc_id',
-                            'tongiao_id',
+                            'so_dien_thoai',
+                            'loaicutru_id',
                             'quanhechuho_id',
                             'cccd',
                             'cccd_ngaycap',
@@ -141,6 +141,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                                 <?= $form->field($thanhvien, "[{$index}]so_dien_thoai")->textInput(['maxlength' => true]) ?>
                                             </div>
                                             <div class="col-sm-3">
+                                                <?= $form->field($thanhvien, "[{$index}]ngaysinh")->widget(MaskedInput::class, [
+                                                    'clientOptions' => ['alias' =>  'date']
+                                                ]) ?>
+                                            </div>
+                                            <div class="col-sm-3">
                                                     <?= $form->field($thanhvien, "[{$index}]gioitinh_id")->widget(Select2::class, [
                                                         'data' => ArrayHelper::map($categories['gioitinh'], 'id', 'ten'),
                                                         'options' => ['prompt' => 'Chọn giới tính'],
@@ -149,6 +154,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                                         ],
                                                     ]) ?>
                                             </div>
+                                            
+                                        </div><!-- end:row -->
+
+                                        <div class="row">
                                             <div class="col-sm-3">
                                                     <?= $form->field($thanhvien, "[{$index}]loaicutru_id")->widget(Select2::class, [
                                                         'data' => ArrayHelper::map($categories['loaicutru'], 'id', 'ten'),
@@ -158,9 +167,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                                         ],
                                                     ]) ?>
                                             </div>
-                                        </div><!-- end:row -->
-
-                                        <div class="row">
                                             <div class="col-sm-3">
                                                 <?= $form->field($thanhvien, "[{$index}]cccd")->textInput(['maxlength' => true]) ?>
                                             </div>
@@ -169,10 +175,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     'clientOptions' => ['alias' =>  'date']
                                                 ]) ?>
                                             </div>
-                                            <div class="col-sm-4">
+                                            <div class="col-sm-3">
                                                 <?= $form->field($thanhvien, "[{$index}]cccd_noicap")->textInput(['maxlength' => true]) ?>
                                             </div>
-                                            <div class="col-sm-2">
+                                            <div class="col-sm-3">
                                                     <?= $form->field($thanhvien, "[{$index}]quanhechuho_id")->widget(Select2::class, [
                                                         'data' => ArrayHelper::map($categories['quanhechuho'], 'id', 'ten'),
                                                         'options' => ['prompt' => 'Chọn quan hệ chủ hộ'],
