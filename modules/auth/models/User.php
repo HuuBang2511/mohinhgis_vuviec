@@ -93,7 +93,7 @@ class User extends AuthUser
 
     public function getPhuongXa()
     {
-        return $this->hasOne(Phuongxa::className(), ['ma_dvhc' => 'phuongxa']);
+        return $this->hasOne(Phuongxa::className(), ['maXa' => 'phuongxa']);
     }
 
 

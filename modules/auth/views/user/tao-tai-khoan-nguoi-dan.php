@@ -65,7 +65,7 @@ use yii\web\JsExpression;
                     <div class="row">
                         <div class="col-lg-12">
                             <?= $form->field($model, 'phuongxa')->widget(Select2::className(), [
-                                    'data' => ArrayHelper::map($categories['phuongxa'],'ma_dvhc','ten_dvhc'),
+                                    'data' => ArrayHelper::map($categories['phuongxa'],'maXa','tenXa'),
                                     'options' => ['id' => 'phuongxa-id', 'prompt' => 'Chọn phường xã'],
                                     'pluginOptions' => [
                                         'allowClear' => true,

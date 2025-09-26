@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = 'Thông tin tài khoản';
                 [
                     'label' => 'Phường xã',
                     'value' => function($model){
-                        return ($model->phuongxa != null) ? $model->phuongXa->ten_dvhc : '';
+                        return ($model->phuongxa != null) ? $model->phuongXa->tenXa : '';
                     }
                 ]
             ],

@@ -161,6 +161,20 @@ class APPConfig
                 'key'=>'quanly.vu-viec.index',
                 'hasChild' => false,
             ],
+            [
+                'name' => 'Cán bộ',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/can-bo',
+                'key'=>'quanly.can-bo.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Đơn vị',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/don-vi',
+                'key'=>'quanly.don-vi.index',
+                'hasChild' => false,
+            ],
         ],
         'map' => [
             // [

@@ -28,7 +28,7 @@ class CategoriesService
 
     public static function getCategoriesUser(){
         $categories = [];
-        $categories['phuongxa'] = Phuongxa::find()->orderBy('ten_dvhc')->asArray()->all();
+        $categories['phuongxa'] = Phuongxa::find()->orderBy('tenXa')->asArray()->all();
         return $categories;
     }
 

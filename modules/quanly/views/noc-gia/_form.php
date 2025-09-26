@@ -114,16 +114,10 @@ var map = L.map('map').setView([
 
 // Lớp nền
 
-var hcmgis = L.tileLayer(
-    'https://thuduc-maps.hcmgis.vn/thuducserver/gwc/service/wmts?layer=thuduc:thuduc_maps&style=&tilematrixset=EPSG:900913&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/png&TileMatrix=EPSG:900913:{z}&TileCol={x}&TileRow={y}', {
-        maxZoom: 25,
-        minZoom: 13,
-}).addTo(map);
-
 var googleMap = L.tileLayer('http://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
     maxZoom: 24,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-});
+}).addTo(map);
 
 var vetinh = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
     maxZoom: 24,
@@ -132,7 +126,7 @@ var vetinh = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', 
 
 
 L.control.layers(
-    { "HCMGIS" : hcmgis ,"ggMap": googleMap, "Vệ tinh": vetinh },
+    { "ggMap": googleMap, "Vệ tinh": vetinh },
 ).addTo(map);
 
 
