@@ -3,185 +3,132 @@
 namespace app\modules\quanly\controllers;
 
 use app\modules\quanly\base\QuanlyBaseController;
-use app\modules\quanly\models\LinhVuc;
-use app\modules\quanly\models\Phuongxa; // MỚI: Thêm model Phuongxa
+use app\modules\quanly\models\DiemNhayCam;
+use app\modules\quanly\models\DiemTrongDiem;
+use app\modules\quanly\models\HoGiaDinh;
+use app\modules\quanly\models\NguoiDan;
+use app\modules\quanly\models\NocGia;
+use app\modules\quanly\models\Phuongxa;
 use app\modules\quanly\models\TrangThaiXuLy;
 use app\modules\quanly\models\VuViec;
 use Yii;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
-use yii\web\Response;
 
 class DashboardController extends QuanlyBaseController
 {
+    /**
+     * Hiển thị trang dashboard chính với các số liệu thống kê và biểu đồ.
+     * @return string
+     * @throws \yii\db\Exception
+     */
     public function actionIndex()
     {
-       
-
-        return $this->render('index', [
-            
-        ]);
-    }
-
-    /**
-     * Action này xử lý các yêu cầu AJAX để làm mới dữ liệu dashboard khi người dùng thay đổi bộ lọc.
-     */
-    public function actionFilterData()
-    {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        $request = Yii::$app->request;
-        $dateRange = $request->get('date_range');
-        $maPhuongXa = $request->get('ma_phuongxa'); // MỚI: Nhận tham số lọc phường xã
-
-        if(Yii::$app->user->identity->phuongxa != null){
-            $maPhuongXa = Yii::$app->user->identity->phuongxa;
-        }else{
-            $maPhuongXa = $request->get('ma_phuongxa');
-        }
-
-        return $this->getDashboardData($dateRange, $maPhuongXa); // CẬP NHẬT: Truyền tham số mới
-    }
-
-    /**
-     * Hàm trung tâm để lấy tất cả dữ liệu cho dashboard.
-     * @param string|null $dateRange Khoảng thời gian lọc (ví dụ: "2025-08-01 - 2025-08-27")
-     * @param string|null $maPhuongXa Mã ĐVHC của phường xã cần lọc
-     * @return array
-     */
-    private function getDashboardData($dateRange = null, $maPhuongXa = null) // CẬP NHẬT: Thêm tham số $maPhuongXa
-    {
-        $query = VuViec::find();
-
-        // Áp dụng bộ lọc thời gian nếu có
-        if ($dateRange) {
-            $dates = explode(' - ', $dateRange);
-            if (count($dates) == 2) {
-                $startDate = date('Y-m-d 00:00:00', strtotime($dates[0]));
-                $endDate = date('Y-m-d 23:59:59', strtotime($dates[1]));
-                $query->andWhere(['between', 'ngay_tiep_nhan', $startDate, $endDate]);
-            }
-        }
+        // === 1. LẤY DỮ LIỆU CHO CÁC THẺ KPI ===
+        $totalVuViec = VuViec::find()->count();
+        $vuViecCanhBaoDo = VuViec::find()->where(['muc_do_canh_bao' => VuViec::CANH_BAO_DO])->count();
+        $totalHoGiaDinh = HoGiaDinh::find()->count();
+        $totalNocGia = NocGia::find()->count();
+        $totalDiemNhayCam = DiemNhayCam::find()->count();
+        $totalDiemTrongDiem = DiemTrongDiem::find()->count();
+        $totalNguoiDan = NguoiDan::find()->count();
+        $totalPhuongXa = Phuongxa::find()->count();
         
-        // MỚI: Áp dụng bộ lọc phường xã cho toàn bộ query
-        if ($maPhuongXa) {
-            $query->andWhere(['ma_dvhc_phuongxa' => $maPhuongXa]);
-        }
+        // Lấy ID của trạng thái 'Đã giải quyết' để loại trừ khỏi các vụ việc quá hạn
+        $trangThaiDaGiaiQuyet = TrangThaiXuLy::findOne(['ten_trang_thai' => 'Đã giải quyết']);
+        $idDaGiaiQuyet = $trangThaiDaGiaiQuyet ? $trangThaiDaGiaiQuyet->id : -1;
 
-        if(Yii::$app->user->identity->phuongxa != null){
-            $query->andWhere(['ma_dvhc_phuongxa' => Yii::$app->user->identity->phuongxa]);
-        }
+        // === 2. LẤY DỮ LIỆU CHO CÁC BIỂU ĐỒ ===
 
+        // Biểu đồ tròn: Thống kê theo trạng thái
+        $dataByStatus = VuViec::find()
+            ->select(['trang_thai_hien_tai_id', 'count' => 'COUNT(*)'])
+            ->groupBy('trang_thai_hien_tai_id')
+            ->with('trangThaiHienTai')
+            ->asArray()
+            ->all();
 
-        // 1. Dữ liệu cho các chỉ số KPI
-        $kpiData = $this->getKpiData($query);
-
-        // 2. Dữ liệu cho các biểu đồ
-        // CẬP NHẬT: Truyền cả 2 tham số lọc vào hàm getChartData
-        $chartData = $this->getChartData($query, $dateRange, $maPhuongXa);
-
-        // 3. Dữ liệu cho các bảng
-        $tableData = $this->getTableData($query);
-
-        return [
-            'kpi' => $kpiData,
-            'charts' => $chartData,
-            'tables' => $tableData,
+        $statusChartData = [
+            'labels' => ArrayHelper::getColumn($dataByStatus, function ($item) {
+                return $item['trangThaiHienTai']['ten_trang_thai'] ?? 'Chưa xác định';
+            }),
+            'data' => array_map('intval', ArrayHelper::getColumn($dataByStatus, 'count')),
         ];
-    }
 
-    /**
-     * Lấy dữ liệu cho các thẻ KPI.
-     * @param \yii\db\ActiveQuery $query
-     * @return array
-     */
-    private function getKpiData($query)
-    {
-        $total = (clone $query)->count();
-        $redAlerts = (clone $query)->andWhere(['muc_do_canh_bao' => VuViec::CANH_BAO_DO])->count();
-        $overdue = (clone $query)
-            ->joinWith('trangThaiHienTai ts')
-            ->andWhere(['<', 'han_xu_ly', new Expression('NOW()')])
-            ->andWhere(['<>', 'ts.ten_trang_thai', 'Đã giải quyết'])
-            ->count();
-        $resolved = (clone $query)
-            ->joinWith('trangThaiHienTai ts')
-            ->andWhere(['ts.ten_trang_thai' => 'Đã giải quyết'])
-            ->count();
-            // dd($overdue);
+        // Biểu đồ cột: Thống kê theo lĩnh vực
+        $dataByLinhVuc = VuViec::find()
+            ->select(['linh_vuc_id', 'count' => 'COUNT(*)'])
+            ->groupBy('linh_vuc_id')
+            ->with('linhVuc')
+            ->asArray()
+            ->all();
 
-        return compact('total', 'redAlerts', 'overdue', 'resolved');
-    }
+        $linhVucChartData = [
+            'labels' => ArrayHelper::getColumn($dataByLinhVuc, function ($item) {
+                return $item['linhVuc']['ten_linh_vuc'] ?? 'Chưa xác định';
+            }),
+            'data' => array_map('intval', ArrayHelper::getColumn($dataByLinhVuc, 'count')),
+        ];
+        
+        // Biểu đồ đường: Xu hướng vụ việc trong 30 ngày qua
+        $trendData = VuViec::find()
+            ->select(['ngay' => new Expression('DATE(created_at)'), 'count' => 'COUNT(*)'])
+            ->where(['>=', 'created_at', new Expression('NOW() - INTERVAL \'30 days\'')])
+            ->groupBy(['ngay'])
+            ->orderBy('ngay ASC')
+            ->asArray()
+            ->all();
 
-    /**
-     * Lấy dữ liệu cho các biểu đồ.
-     * @param \yii\db\ActiveQuery $query
-     * @param string|null $dateRange
-     * @param string|null $maPhuongXa
-     * @return array
-     */
-    private function getChartData($query, $dateRange, $maPhuongXa) // CẬP NHẬT: Nhận tham số lọc
-    {
-        // Biểu đồ xu hướng theo ngày
-        $trendQuery = (clone $query); // Đã được lọc theo phường xã từ hàm gọi
-        if (!$dateRange) { // Nếu không có bộ lọc ngày tháng, mặc định lấy 30 ngày gần nhất
-            $trendQuery->andWhere(['>=', 'ngay_tiep_nhan', new Expression("NOW() - INTERVAL '30 day'")]);
+        // Chuẩn bị dữ liệu đầy đủ 30 ngày để biểu đồ không bị đứt gãy
+        $trendChartLabels = [];
+        $trendChartValues = [];
+        $trendDataMap = ArrayHelper::map($trendData, 'ngay', 'count');
+        for ($i = 29; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $trendChartLabels[] = date('d/m', strtotime($date));
+            $trendChartValues[] = isset($trendDataMap[$date]) ? (int)$trendDataMap[$date] : 0;
         }
-        $trend = $trendQuery
-            ->select(['date' => 'DATE(ngay_tiep_nhan)', 'count' => 'COUNT(*)'])
-            ->groupBy('date')
-            ->orderBy('date ASC')
-            ->asArray()
-            ->all();
+        $trendChartData = [
+            'labels' => $trendChartLabels,
+            'data' => $trendChartValues,
+        ];
 
-        // Biểu đồ cơ cấu theo lĩnh vực
-        $byDomain = (clone $query)
-            ->select(['lv.ten_linh_vuc', 'total' => 'COUNT(vu_viec.id)'])
-            ->joinWith('linhVuc lv')
-            ->groupBy('lv.ten_linh_vuc')
-            ->orderBy(['total' => SORT_DESC])
-            ->limit(6) // Giới hạn 6 lĩnh vực cao nhất cho biểu đồ gọn
-            ->asArray()
-            ->all();
+        // === 3. LẤY DỮ LIỆU CHO CÁC DANH SÁCH ===
 
-        // Biểu đồ cơ cấu theo mức độ cảnh báo
-        $byAlertLevel = (clone $query)
-            ->select(['muc_do_canh_bao', 'total' => 'COUNT(*)'])
-            ->andWhere(['is not', 'muc_do_canh_bao', null])
-            ->groupBy('muc_do_canh_bao')
-            ->asArray()
-            ->all();
-
-        return compact('trend', 'byDomain', 'byAlertLevel');
-    }
-
-    /**
-     * Lấy dữ liệu cho các bảng.
-     * @param \yii\db\ActiveQuery $query
-     * @return array
-     */
-    private function getTableData($query)
-    {
-        // Bảng: Các vụ việc "nóng" gần đây
-        $hotIncidents = (clone $query)
-            ->andWhere(['in', 'muc_do_canh_bao', [VuViec::CANH_BAO_DO, VuViec::CANH_BAO_VANG]])
-            ->with(['linhVuc', 'phuongXa'])
-            ->orderBy(['ngay_tiep_nhan' => SORT_DESC])
+        // Danh sách 5 vụ việc cảnh báo đỏ mới nhất
+        $topCanhBaoDo = VuViec::find()
+            ->where(['muc_do_canh_bao' => VuViec::CANH_BAO_DO])
+            ->orderBy(['created_at' => SORT_DESC])
             ->limit(5)
-            ->asArray()
+            ->with('linhVuc', 'phuongXa')
             ->all();
 
-        // Bảng: Các vụ việc sắp đến hạn
-        $approachingDeadline = (clone $query)
-            ->joinWith('trangThaiHienTai ts')
-            ->andWhere(['between', 'han_xu_ly', new Expression('NOW()'), new Expression("NOW() + INTERVAL '5 day'")])
-            ->andWhere(['<>', 'ts.ten_trang_thai', 'Đã giải quyết'])
-            ->with(['linhVuc', 'phuongXa'])
+        // Danh sách 5 vụ việc quá hạn cấp bách nhất
+        $topQuaHan = VuViec::find()
+            ->where(['<', 'han_xu_ly', date('Y-m-d H:i:s')])
+            ->andWhere(['!=', 'trang_thai_hien_tai_id', $idDaGiaiQuyet])
             ->orderBy(['han_xu_ly' => SORT_ASC])
             ->limit(5)
-            ->asArray()
+            ->with('linhVuc', 'phuongXa', 'trangThaiHienTai')
             ->all();
-            
-        return compact('hotIncidents', 'approachingDeadline');
+
+        return $this->render('index', [
+            'kpis' => [
+                'totalVuViec' => $totalVuViec,
+                'highRisk' => $vuViecCanhBaoDo,
+                'totalHoGiaDinh' => $totalHoGiaDinh,
+                'totalNocGia' => $totalNocGia,
+                'totalDiemNhayCam' => $totalDiemNhayCam,
+                'totalDiemTrongDiem' => $totalDiemTrongDiem,
+                'totalNguoiDan' => $totalNguoiDan,
+                'totalPhuongXa' => $totalPhuongXa,
+            ],
+            'statusChartData' => $statusChartData,
+            'linhVucChartData' => $linhVucChartData,
+            'trendChartData' => $trendChartData,
+            'topCanhBaoDo' => $topCanhBaoDo,
+            'topQuaHan' => $topQuaHan,
+        ]);
     }
 }
+
