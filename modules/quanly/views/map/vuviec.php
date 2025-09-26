@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // --- CONFIGURATION ---
-    const WMS_URL = 'https://nongdanviet.net/geoserver/mohinhgis_pa05/wms';
+    const WMS_URL = 'http://103.9.77.141:8080/geoserver/mohinhgis_pa05/wms';
     const MAP_CENTER = [20.473381288809428, 106.31907196809175];
     const MAP_ZOOM = 11;
     const layerConfig = [
