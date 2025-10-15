@@ -218,8 +218,8 @@ document.addEventListener('DOMContentLoaded', function () {
             diemNhayCam: '<?= $diemNhayCamDetailUrlBase ?>',
             diemTrongDiem: '<?= $diemTrongDiemDetailUrlBase ?>',
         },
-        MAP_CENTER: [20.473381, 106.319071],
-        MAP_ZOOM: 11,
+        MAP_CENTER: [20.47206102639595, 106.318817631933],
+        MAP_ZOOM: 14,
         
         map: null,
         leafletLayers: {},
@@ -276,13 +276,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // --- MODULE QUẢN LÝ LỚP DỮ LIỆU ---
         Layers: {
             config: [
-                { id: 'clusterVuviecLayer', type: 'cluster', displayName: 'Vụ việc (Cụm)', defaultVisible: true, icon: 'layout-grid' },
+                { id: 'clusterVuviecLayer', type: 'cluster', displayName: 'Vụ việc (Cụm)', defaultVisible: false, icon: 'layout-grid' },
                 { id: 'heatmapVuviecLayer', type: 'heatmap', displayName: 'Bản đồ nhiệt Vụ việc', defaultVisible: false, icon: 'flame' },
                 { id: 'wmsVuviecLayer', type: 'wms', wmsName: 'mohinhgis_pa05:vu_viec', displayName: 'Vụ việc (Điểm WMS)', defaultVisible: false, zIndex: 550, icon: 'map-pin', popupFields: {'ma_vu_viec': 'Mã vụ việc', 'tom_tat_noi_dung' : 'Tóm tắt nội dung'} },
                 { id: 'wmsDiemnhaycamLayer', type: 'wms', wmsName: 'mohinhgis_pa05:diem_nhay_cam', displayName: 'Điểm nhạy cảm', defaultVisible: false, zIndex: 540, icon: 'siren', popupFields: {'tenloaihinh': 'Tên loại hình', 'thongtin': 'Thông tin'} },
                 { id: 'wmsDiemtrongdiemLayer', type: 'wms', wmsName: 'mohinhgis_pa05:diem_trong_diem', displayName: 'Điểm trọng điểm', defaultVisible: false, zIndex: 530, icon: 'target', popupFields: {'tenloaihinh': 'Tên loại hình', 'thongtin': 'Thông tin'} },
                 { id: 'wmsNocgiaLayer', type: 'wms', wmsName: 'mohinhgis_pa05:noc_gia', displayName: 'Nóc gia', defaultVisible: false, zIndex: 520, icon: 'home', popupFields: {'so_nha': 'Số nhà', 'ten_duong' : 'Tên đường'} },
-                { id: 'wmsKhuphoLayer', type: 'wms', wmsName: 'mohinhgis_pa05:kp', displayName: 'Khu phố', defaultVisible: false, zIndex: 450, icon: 'map', popupFields: {'TenKhuPho': 'Tên khu phố'} },
+                { id: 'wmsKhuphoLayer', type: 'wms', wmsName: 'mohinhgis_pa05:kp', displayName: 'Khu phố', defaultVisible: true, zIndex: 450, icon: 'map', popupFields: {'TenKhuPho': 'Tên khu phố'} },
             ],
             
             // SỬA LỖI: Bọc trong try...finally để đảm bảo spinner luôn tắt
