@@ -41,7 +41,7 @@ class NguoiDanSearch extends NguoiDan
      */
     public function search($params)
     {
-        $query = NguoiDan::find();
+        $query = NguoiDan::find()->where(['status' => 1]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

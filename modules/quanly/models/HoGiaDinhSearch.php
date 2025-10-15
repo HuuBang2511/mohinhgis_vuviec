@@ -41,7 +41,7 @@ class HoGiaDinhSearch extends HoGiaDinh
      */
     public function search($params)
     {
-        $query = HoGiaDinh::find();
+        $query = HoGiaDinh::find()->where(['status' => 1]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

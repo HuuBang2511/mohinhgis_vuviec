@@ -41,7 +41,7 @@ class NocGiaSearch extends NocGia
      */
     public function search($params)
     {
-        $query = NocGia::find();
+        $query = NocGia::find()->where(['status' => 1]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
