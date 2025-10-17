@@ -10,6 +10,7 @@ use yii\helpers\Html;
 <div class="nguoi-dan-create">
     <?= $this->render('_form', [
         'model' => $model,
-        'categories' => $categories
+        'categories' => $categories,
+        'filedinhkem' => $filedinhkem,
     ]) ?>
 </div>

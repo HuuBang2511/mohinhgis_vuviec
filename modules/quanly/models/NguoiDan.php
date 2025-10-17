@@ -54,7 +54,7 @@ class NguoiDan extends QuanlyBaseModel{
             [['gioitinh_id', 'created_by', 'updated_by', 'hogiadinh_id', 'loaicutru_id', 'quanhechuho_id'], 'default', 'value' => null],
             [['gioitinh_id', 'created_by', 'updated_by', 'hogiadinh_id', 'loaicutru_id', 'quanhechuho_id'], 'integer'],
             [['created_at', 'updated_at', 'cccd_ngaycap', 'ngaysinh'], 'safe'],
-            [['cccd', 'cccd_noicap'], 'string'],
+            [['cccd', 'cccd_noicap', 'url_dinhkem'], 'string'],
             [['ho_ten', 'email'], 'string', 'max' => 100],
             [['dia_chi'], 'string', 'max' => 255],
             [['so_dien_thoai'], 'string', 'max' => 15],
@@ -91,6 +91,7 @@ class NguoiDan extends QuanlyBaseModel{
             'cccd_noicap' => 'CCCD nơi cấp',
             'quanhechuho_id' => 'Quan hệ chủ hộ',
             'ngaysinh' => 'Ngày sinh',
+            'url_dinhkem' => 'url_dinhkem',
         ];
     }
 

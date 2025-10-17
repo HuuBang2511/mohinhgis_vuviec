@@ -12,6 +12,8 @@ use \yii\web\Response;
 use yii\helpers\Html;
 use app\modules\services\CategoriesService;
 use app\modules\quanly\models\ThongtinCutru;
+use yii\web\UploadedFile;
+use app\modules\quanly\base\UploadFile;
 
 /**
  * NguoiDanController implements the CRUD actions for NguoiDan model.
@@ -97,12 +99,32 @@ class NguoiDanController extends \app\modules\quanly\base\QuanlyBaseController
         }else{
             $model = new NguoiDan();
         }
+
+        $filedinhkem = new UploadFile();
        
-        if($model->load($request->post())){
+        if($model->load($request->post()) && $filedinhkem->load($request->post())){
 
             $model->save();
 
             $model->dia_chi = $model->hogiadinh->nocgia->so_nha.', '.$model->hogiadinh->nocgia->ten_duong.', '.$model->hogiadinh->nocgia->khupho->TenKhuPho.', '.$model->hogiadinh->nocgia->phuongxa->tenXa;
+
+            $filedinhkem->fileupload = UploadedFile::getInstances($filedinhkem, 'fileupload');
+
+            if($filedinhkem->fileupload != null){
+                $file = [];
+                foreach($filedinhkem->fileupload as $i => $item){
+                    if(strpos($item->name, "'") == true){
+                        $item->name = str_replace("'","_",$item->name);
+                    }
+
+                    $file[] = 'uploads/nguoidan/'.$model->id.'/'.$item->baseName.'.'.$item->extension;
+                    $path = 'uploads/nguoidan/'.$model->id.'/';
+
+                    $filedinhkem->uploadFile($path, $item);
+                }
+                $model->url_dinhkem = json_encode($file);
+                $model->save();
+            }
 
             $model->save();
             
@@ -112,6 +134,7 @@ class NguoiDanController extends \app\modules\quanly\base\QuanlyBaseController
         return $this->render('create', [
             'model' => $model,
             'categories' => CategoriesService::getCategoriesCongdan(),
+            'filedinhkem' => $filedinhkem
         ]);
     }
 
@@ -126,10 +149,43 @@ class NguoiDanController extends \app\modules\quanly\base\QuanlyBaseController
     {
         $request = Yii::$app->request;
         $model = $this->findModel($id);
+        $filedinhkem = new UploadFile();
 
-        if($model->load($request->post())){
+        if($model->load($request->post()) && $filedinhkem->load($request->post())){
             $model->dia_chi = $model->hogiadinh->nocgia->so_nha.', '.$model->hogiadinh->nocgia->ten_duong.', '.$model->hogiadinh->nocgia->khupho->TenKhuPho.', '.$model->hogiadinh->nocgia->phuongxa->tenXa;
             $model->save();
+
+            $filedinhkem->fileupload = UploadedFile::getInstances($filedinhkem, 'fileupload');
+
+            if($filedinhkem->fileupload != null){
+
+                if($model->url_dinhkem != null){
+                    $fileCu = $model->url_dinhkem;
+                    $fileCu = json_decode($fileCu, true);
+                    if(count($fileCu) > 0){
+                        foreach($fileCu as $i => $item){
+                            if(is_file($item)){
+                                unlink($item); 
+                            } 
+                        }
+                    }
+                }
+
+                $file = [];
+                foreach($filedinhkem->fileupload as $i => $item){
+                    if(strpos($item->name, "'") == true){
+                        $item->name = str_replace("'","_",$item->name);
+                    }
+
+                    $file[] = 'uploads/nguoidan/'.$model->id.'/'.$item->baseName.'.'.$item->extension;
+                    $path = 'uploads/nguoidan/'.$model->id.'/';
+
+                    $filedinhkem->uploadFile($path, $item);
+                }
+
+                $model->url_dinhkem = json_encode($file);
+                $model->save();
+            }
             
             return $this->redirect(['ho-gia-dinh/view', 'id' => $model->hogiadinh_id]);
         }
@@ -137,6 +193,7 @@ class NguoiDanController extends \app\modules\quanly\base\QuanlyBaseController
         return $this->render('update', [
             'model' => $model,
             'categories' => CategoriesService::getCategoriesCongdan(),
+            'filedinhkem' => $filedinhkem
         ]);
     }
 

@@ -9,6 +9,7 @@ use yii\web\JsExpression;
 use kartik\select2\Select2;
 use app\widgets\maskedinput\MaskedInput;
 use kartik\depdrop\DepDrop;
+use kartik\file\FileInput;
 
 /* @var $this yii\web\View */
 /* @var $categories app\modules\quanly\models\DonViKinhTe */
@@ -22,6 +23,17 @@ $this->title = Yii::t('app', $const['label'][$requestedAction->id] . ' ' . $cont
 $this->params['breadcrumbs'][] = ['label' => $const['label']['index'] . ' ' . $controller->const['title'], 'url' => $controller->const['url']['index']];
 $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create'] . ' ' . $controller->const['title'] : $const['label']['update'] . ' ' . $controller->const['title'];
 
+?>
+
+<?php 
+    if($model->url_dinhkem != null){
+        $file = [];
+        $model->url_dinhkem = json_decode($model->url_dinhkem, true);
+
+        foreach($model->url_dinhkem as $i => $item){
+            $file[] = Yii::$app->homeUrl.$item;
+        }
+    }
 ?>
 
 
@@ -40,7 +52,7 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
 
     <div class="block-content">
         <div class="row mt-3">
-           
+
         </div>
 
         <div class="row mt-3">
@@ -55,7 +67,7 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
                         'allowClear' => true
                     ],
                 ]) ?>
-            </div>  
+            </div>
             <div class="col-lg-3">
                 <?= $form->field($model, 'loaicutru_id')->widget(Select2::class, [
                     'data' => ArrayHelper::map($categories['loaicutru'], 'id', 'ten'),                          
@@ -64,17 +76,17 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
                         'allowClear' => true
                     ],
                 ]) ?>
-            </div>   
+            </div>
             <div class="col-lg-3">
                 <?= $form->field($model, 'so_dien_thoai')->input('text') ?>
-            </div> 
-            
+            </div>
+
         </div>
 
         <div class="row mt-3">
             <div class="col-lg-3">
                 <?= $form->field($model, 'email')->input('text') ?>
-            </div>   
+            </div>
             <div class="col-lg-3">
                 <?= $form->field($model, 'cccd')->input('text') ?>
             </div>
@@ -85,7 +97,7 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
                     ],
                 ]); ?>
             </div>
-            
+
         </div>
 
         <div class="row mt-3">
@@ -100,7 +112,7 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
             </div>
         </div> -->
 
-       
+
 
         <div class="row mt-3">
             <div class="col-lg-3">
@@ -111,7 +123,88 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
                         'allowClear' => true
                     ],
                 ]) ?>
-            </div>   
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <?php if($model->isNewRecord): ?>
+            <div class="col-lg-12">
+                <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                    'options'=>[
+                        'multiple'=>true
+                    ],
+                    'pluginOptions' => [
+                        'initialPreviewAsData' => true,
+                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                        'showPreview' => true,
+                        'showCaption' => true,
+                        'showRemove' => true,
+                        'showUpload' => false,
+                        'fileActionSettings' => [
+                            'showRemove' => false, 
+                            'showUpload' => false, 
+                            'showZoom' => false,   
+                            'showDrag' => false,   
+                        ],
+                    ]
+                    ])->label('File đính kèm');
+                ?>
+            </div>
+            <?php else: ?>
+            <?php if($model->url_dinhkem != null): ?>
+            <div class="col-lg-12">
+                <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                    'options'=>[
+                        'multiple'=>true
+                    ],
+                    'pluginOptions' => [
+                        'overwriteInitial' => true,
+                        'initialPreview' => $file,
+                        'initialPreviewAsData' => true,
+                        'initialPreviewFileType' => 'pdf',
+                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                        'showPreview' => true,
+                        'showCaption' => true,
+                        'showRemove' => false,
+                        'showUpload' => false,
+                        'fileActionSettings' => [
+                            'showRemove' => false, 
+                            'showUpload' => false, 
+                            'showZoom' => true,   
+                            'showDrag' => false,   
+                        ],
+                        'initialPreviewConfig' => array_map(function($f) {
+                            return ['showRemove' => false]; // tắt remove từng file
+                        }, (array)$file),
+                    ]
+                ])->label('File đính kèm');
+                ?>
+            </div>
+            <?php else: ?>
+            <div class="col-lg-12">
+                <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                    'options'=>[
+                        'multiple'=>true
+                    ],
+                        'pluginOptions' => [
+                            'initialPreviewAsData' => true,
+                            'allowedFileExtensions' =>['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                            'showPreview' => true,
+                            'showCaption' => true,
+                            'showRemove' => true,
+                            'showUpload' => false,
+                            'fileActionSettings' => [
+                                'showRemove' => false, 
+                                'showUpload' => false, 
+                                'showZoom' => false,   
+                                'showDrag' => false,   
+                            ],
+                        ]
+                    ])->label('File đính kèm');
+                ?>
+            </div>
+            <?php endif; ?>
+            <?php endif; ?>
         </div>
 
         <div class="row mt-3">
@@ -122,4 +215,3 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
     </div>
 </div>
 <?php ActiveForm::end(); ?>
-
