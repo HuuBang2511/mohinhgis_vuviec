@@ -135,7 +135,7 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
                     ],
                     'pluginOptions' => [
                         'initialPreviewAsData' => true,
-                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg'],
                         'showPreview' => true,
                         'showCaption' => true,
                         'showRemove' => true,
@@ -162,7 +162,7 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
                         'initialPreview' => $file,
                         'initialPreviewAsData' => true,
                         'initialPreviewFileType' => 'pdf',
-                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg'],
                         'showPreview' => true,
                         'showCaption' => true,
                         'showRemove' => false,
@@ -188,7 +188,7 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? $const['label']['create']
                     ],
                         'pluginOptions' => [
                             'initialPreviewAsData' => true,
-                            'allowedFileExtensions' =>['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                            'allowedFileExtensions' =>['png', 'jpg', 'jpeg'],
                             'showPreview' => true,
                             'showCaption' => true,
                             'showRemove' => true,

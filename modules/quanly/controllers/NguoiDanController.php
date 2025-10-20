@@ -77,6 +77,16 @@ class NguoiDanController extends \app\modules\quanly\base\QuanlyBaseController
         
         
         //dd($thongtinLienquan['tochuc'][0]->loaitochuc);
+        
+
+        $model = $this->findModel($id);
+        //dd($model);
+
+        if($model->url_dinhkem != null){
+            $file_dinhkem = json_encode($model->url_dinhkem);
+        }else{
+            $file_dinhkem = null;
+        }
 
         return $this->render('view', [
             'model' => $this->findModel($id),
