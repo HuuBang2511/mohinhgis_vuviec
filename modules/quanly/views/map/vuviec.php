@@ -283,6 +283,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 { id: 'wmsDiemtrongdiemLayer', type: 'wms', wmsName: 'mohinhgis_pa05:diem_trong_diem', displayName: 'Điểm trọng điểm', defaultVisible: false, zIndex: 530, icon: 'target', popupFields: {'tenloaihinh': 'Tên loại hình', 'thongtin': 'Thông tin'} },
                 { id: 'wmsNocgiaLayer', type: 'wms', wmsName: 'mohinhgis_pa05:noc_gia', displayName: 'Nóc gia', defaultVisible: false, zIndex: 520, icon: 'home', popupFields: {'so_nha': 'Số nhà', 'ten_duong' : 'Tên đường'} },
                 { id: 'wmsKhuphoLayer', type: 'wms', wmsName: 'mohinhgis_pa05:kp', displayName: 'Khu phố', defaultVisible: true, zIndex: 450, icon: 'map', popupFields: {'TenKhuPho': 'Tên khu phố'} },
+                { id: 'wmsBuildingLayer', type: 'wms', wmsName: 'mohinhgis_pa05:buildings', displayName: 'Tòa nhà', defaultVisible: false, zIndex: 460, icon: 'building', popupFields: {'fid' : 'fid', 'confidence' : 'confidence'} },
+                { id: 'wmsKtvhxhLayer', type: 'wms', wmsName: 'mohinhgis_pa05:pois', displayName: 'KTVHXH', defaultVisible: false, zIndex: 530, icon: 'map-pin-house', popupFields: {'name': 'Tên'} },
+                { id: 'wmsThuyheLayer', type: 'wms', wmsName: 'mohinhgis_pa05:thuyhe', displayName: 'Thủy hệ', defaultVisible: false, zIndex: 500, icon: 'audio-waveform', popupFields: {'name': 'Tên'} },
             ],
             
             // SỬA LỖI: Bọc trong try...finally để đảm bảo spinner luôn tắt
