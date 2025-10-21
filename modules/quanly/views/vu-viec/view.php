@@ -225,7 +225,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 
-    <div class="card-custom">
+    <!-- <div class="card-custom">
         <div class="card-header">File đính kèm người dân gửi</div>
         <div class="card-body">
             <?= GridView::widget([
@@ -246,7 +246,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]) ?>
         </div>
-    </div>
+    </div> -->
 
     <!-- Bản đồ -->
     <div class="card-custom">
