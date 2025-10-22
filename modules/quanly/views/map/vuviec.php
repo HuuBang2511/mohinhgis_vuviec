@@ -276,14 +276,23 @@ $diemTrongDiemDetailUrlBase = Url::to(['/quanly/diem-trong-diem/view']);
                                 <li class="layer-tree-item">
                                     <i data-lucide="map" class="icon"></i>
                                     <label>
-                                        <span>Khu phố</span>
-                                        <input type="checkbox" data-layer-id="wmsKhuphoLayer" data-layer-type="wms" data-z-index="450" 
-                                               data-wms-name="mohinhgis_pa05:kp" data-display-name="Khu phố" 
-                                               data-popup-fields='{"TenKhuPho": "Tên khu phố"}' checked>
+                                        <span>Phường/Xã</span>
+                                        <input type="checkbox" data-layer-id="wmsPhuongXaLayer" data-layer-type="wms" data-z-index="440" 
+                                               data-wms-name="mohinhgis_pa05:phuongxa" data-display-name="Phường/Xã" 
+                                               data-popup-fields='{"tenXa": "Tên Xã", "maXa": "Mã Xã", "tenTinh": "Tên Tỉnh", "danSo": "Dân số", "dienTich": "Diện tích"}' checked>
                                     </label>
                                 </li>
                                 <li class="layer-tree-item">
-                                    <i data-lucide="audio-waveform" class="icon"></i>
+                                    <i data-lucide="road" class="icon"></i>
+                                    <label>
+                                        <span>Giao thông</span>
+                                        <input type="checkbox" data-layer-id="wmsGiaoThongLayer" data-layer-type="wms" data-z-index="445" 
+                                               data-wms-name="mohinhgis_pa05:giaothong" data-display-name="Giao thông" 
+                                               data-popup-fields='{"name": "Tên đường", "fclass": "Loại đường", "ref": "Số hiệu", "oneway": "Một chiều", "maxspeed": "Tốc độ"}'>
+                                    </label>
+                                </li>
+                                <li class="layer-tree-item">
+                                    <i data-lucide="map" class="icon"></i>
                                     <label>
                                         <span>Thủy hệ</span>
                                         <input type="checkbox" data-layer-id="wmsThuyheLayer" data-layer-type="wms" data-z-index="500" 
@@ -887,4 +896,5 @@ document.addEventListener('DOMContentLoaded', function () {
     App.init();
 });
 </script>
+
 
