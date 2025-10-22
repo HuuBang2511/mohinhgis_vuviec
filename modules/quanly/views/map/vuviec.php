@@ -283,6 +283,15 @@ $diemTrongDiemDetailUrlBase = Url::to(['/quanly/diem-trong-diem/view']);
                                     </label>
                                 </li>
                                 <li class="layer-tree-item">
+                                    <i data-lucide="map" class="icon"></i>
+                                    <label>
+                                        <span>Khu phố</span>
+                                        <input type="checkbox" data-layer-id="wmsKhuphoLayer" data-layer-type="wms" data-z-index="450" 
+                                               data-wms-name="mohinhgis_pa05:kp" data-display-name="Khu phố" 
+                                               data-popup-fields='{"TenKhuPho": "Tên khu phố"}'>
+                                    </label>
+                                </li>
+                                <li class="layer-tree-item">
                                     <i data-lucide="road" class="icon"></i>
                                     <label>
                                         <span>Giao thông</span>
