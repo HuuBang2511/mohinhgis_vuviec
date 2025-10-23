@@ -112,41 +112,7 @@ class APPConfig
 //             ],
 //         ],
         'quanly' => [
-            [
-                'name' => 'Nóc gia',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/noc-gia',
-                'key'=>'quanly.noc-gia.index',
-                'hasChild' => false,
-            ],
-            [
-                'name' => 'Hộ gia đình',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/ho-gia-dinh',
-                'key'=>'quanly.ho-gia-dinh.index',
-                'hasChild' => false,
-            ],
-            [
-                'name' => 'Người dân',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/nguoi-dan',
-                'key'=>'quanly.nguoi-dan.index',
-                'hasChild' => false,
-            ],
-            [
-                'name' => 'Thông tin cư trú',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/thongtin-cutru',
-                'key'=>'quanly.thongtin-cutru.index',
-                'hasChild' => false,
-            ],
-            [
-                'name' => 'Vụ việc',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/vu-viec',
-                'key'=>'quanly.vu-viec.index',
-                'hasChild' => false,
-            ],
+            
             [
                 'name' => 'Cán bộ',
                 'icon' => 'fa fa-list',
@@ -161,13 +127,7 @@ class APPConfig
                 'key'=>'quanly.don-vi.index',
                 'hasChild' => false,
             ],
-            [
-                'name' => 'Import thông tin dân cư',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/noc-gia/import',
-                'key'=>'quanly.noc-gia.import',
-                'hasChild' => false,
-            ],
+            
         ],
         'lopanninh' => [
             [
@@ -207,6 +167,34 @@ class APPConfig
                 'icon' => 'fa fa-list',
                 'url' => 'quanly/noc-gia',
                 'key'=>'quanly.noc-gia.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Hộ gia đình',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/ho-gia-dinh',
+                'key'=>'quanly.ho-gia-dinh.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Người dân',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/nguoi-dan',
+                'key'=>'quanly.nguoi-dan.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Thông tin cư trú',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/thongtin-cutru',
+                'key'=>'quanly.thongtin-cutru.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Import thông tin dân cư',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/noc-gia/import',
+                'key'=>'quanly.noc-gia.import',
                 'hasChild' => false,
             ],
         ],
