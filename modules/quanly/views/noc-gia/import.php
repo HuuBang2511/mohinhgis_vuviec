@@ -26,9 +26,9 @@ CrudAsset::register($this);
                         <span class="title"> File mẫu</span>
                     </a>
 
-                    <a class="btn btn-success" href="<?= Yii::$app->urlManager->createUrl('/uploads/files/form/CAPNHAT_DANCU.xlsx') ?>">
+                    <a class="btn btn-success" href="<?= Yii::$app->urlManager->createUrl('/uploads/files/form/CAPNHAT_DANCU_DULIEUMAU.xlsx') ?>">
                         <i class="fa fa-download"></i>
-                        <span class="title"> File dữ liệu mẫu mẫu</span>
+                        <span class="title"> File dữ liệu mẫu</span>
                     </a>
                 </div>
             </div>
