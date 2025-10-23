@@ -134,20 +134,6 @@ class APPConfig
                 'hasChild' => false,
             ],
             [
-                'name' => 'Điểm nhạy cảm',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/diem-nhay-cam',
-                'key'=>'quanly.diem-nhay-cam.index',
-                'hasChild' => false,
-            ],
-            [
-                'name' => 'Điểm trọng điểm',
-                'icon' => 'fa fa-list',
-                'url' => 'quanly/diem-trong-diem',
-                'key'=>'quanly.diem-trong-diem.index',
-                'hasChild' => false,
-            ],
-            [
                 'name' => 'Thông tin cư trú',
                 'icon' => 'fa fa-list',
                 'url' => 'quanly/thongtin-cutru',
@@ -175,15 +161,119 @@ class APPConfig
                 'key'=>'quanly.don-vi.index',
                 'hasChild' => false,
             ],
+            [
+                'name' => 'Import thông tin dân cư',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/noc-gia/import',
+                'key'=>'quanly.noc-gia.import',
+                'hasChild' => false,
+            ],
+        ],
+        'lopanninh' => [
+            [
+                'name' => 'Mục tiêu trọng điểm',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/muctieu-trongdiem',
+                'key'=>'quanly.muctieu-trongdiem.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Khu vực phức tạp an ninh',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/khuvuc-phuctap-an-ninh',
+                'key'=>'quanly.khuvuc-phuctap-an-ninh.index',
+                'hasChild' => false,
+            ],
+        ],
+        'loptrattuxahoi' => [
+            [
+                'name' => 'Cơ sở kinh doanh có điều kiện',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/cosokinhdoanh-codk',
+                'key'=>'quanly.cosokinhdoanh-codk.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Điểm tệ nạn xã hội',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/diem-tenannxh',
+                'key'=>'quanly.diem-tenannxh.index',
+                'hasChild' => false,
+            ],
+        ],
+        'lopquanlydancu' => [
+            [
+                'name' => 'Nóc gia',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/noc-gia',
+                'key'=>'quanly.noc-gia.index',
+                'hasChild' => false,
+            ],
+        ],
+        'loptuantra' => [
+            [
+                'name' => 'Camera an ninh',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/camera-an-ninh',
+                'key'=>'quanly.camera-an-ninh.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Chốt tuần tra',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/chot-tuantre',
+                'key'=>'quanly.chot-tuantre.index',
+                'hasChild' => false,
+            ],
+        ],
+        'lopvuviec' => [
+            [
+                'name' => 'Vụ việc',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/vu-viec',
+                'key'=>'quanly.vu-viec.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Điểm nhạy cảm',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/diem-nhay-cam',
+                'key'=>'quanly.diem-nhay-cam.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Điểm trọng điểm',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/diem-trong-diem',
+                'key'=>'quanly.diem-trong-diem.index',
+                'hasChild' => false,
+            ],
+        ],
+        'loppccc' => [
+            [
+                'name' => 'Trụ nước PCCC',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/tru-nuoc-ccc',
+                'key'=>'quanly.tru-nuoc-ccc.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Nguồn nước PCCC',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/nguon-nuoc-ccc',
+                'key'=>'quanly.nguon-nuoc-ccc.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Cơ sở nguy cơ cháy nổ',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/cosonguyco-chayno',
+                'key'=>'quanly.cosonguyco-chayno.index',
+                'hasChild' => false,
+            ],
         ],
         'map' => [
-            // [
-            //     'name' => 'Cấp nước Đức Trọng',
-            //     'icon' => 'fa fa-list',
-            //     'url' => 'quanly/map/ductrong',
-            //     'key'=>'quanly.map.ductrong',
-            //     'hasChild' => false,
-            // ],
+           
             [
                 'name' => 'Bản đồ',
                 'icon' => 'fa fa-map',
@@ -193,20 +283,41 @@ class APPConfig
             ]
         ],
         'danhmuc' => [
-            // [
-            //     'name' => 'Lĩnh vực',
-            //     'icon' => 'fa fa-list',
-            //     'url' => 'quanly/linh-vuc',
-            //     'key'=>'quanly.linhvuc.index',
-            //     'hasChild' => false,
-            // ],
-            // [
-            //     'name' => 'Trạng thái',
-            //     'icon' => 'fa fa-list',
-            //     'url' => 'quanly/trang-thai-xu-ly',
-            //     'key'=>'quanly.trang-thai-xu-ly.index',
-            //     'hasChild' => false,
-            // ]
+            [
+                'name' => 'Giới tính',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/danhmuc/dm-gioitinh',
+                'key'=>'quanly.danhmuc.dm-gioitinh.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Quan hệ chủ hộ',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/danhmuc/dm-quanhechuho',
+                'key'=>'quanly.danhmuc.dm-quanhechuho.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Loại cư trú',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/danhmuc/dm-loaicutru',
+                'key'=>'quanly.danhmuc.dm-loaicutru.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Phường xã',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/phuongxa',
+                'key'=>'quanly.phuongxa.index',
+                'hasChild' => false,
+            ],
+            [
+                'name' => 'Khu phố',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/kp',
+                'key'=>'quanly.kp.index',
+                'hasChild' => false,
+            ],
         ],
 
     ];

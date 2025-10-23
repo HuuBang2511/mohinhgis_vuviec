@@ -57,7 +57,7 @@ class ChotTuantre extends QuanlyBaseModel
             'id' => 'ID',
             'ten_chot' => 'Tên chốt',
             'loai_chot' => 'Loại chốt',
-            'don_vi_phu_trach' => 'Đơn vị phụ trác',
+            'don_vi_phu_trach' => 'Đơn vị phụ trách',
             'phuong_xa' => 'Phuong Xa',
             'quan_huyen' => 'Quan Huyen',
             'gio_truc' => 'Giờ trực',

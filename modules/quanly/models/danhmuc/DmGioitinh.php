@@ -1,7 +1,7 @@
 <?php
 
 namespace app\modules\quanly\models\danhmuc;
-
+use app\modules\quanly\base\QuanlyBaseModel;
 use Yii;
 
 /**
@@ -17,7 +17,7 @@ use Yii;
  *
  * @property NguoiDan[] $nguoiDans
  */
-class DmGioitinh extends \yii\db\ActiveRecord
+class DmGioitinh extends QuanlyBaseModel
 {
     /**
      * {@inheritdoc}
@@ -47,7 +47,7 @@ class DmGioitinh extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'ten' => 'Ten',
+            'ten' => 'Tên',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

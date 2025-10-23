@@ -14,7 +14,20 @@ $this->title = (isset($const['title'])) ? $const['title'] : 'Nóc gia';
 $this->params['breadcrumbs'][] = $this->title;
 
 CrudAsset::register($this);
-
+$this->registerCss('
+    @media (max-width: 767px) {
+        .table-responsive .table th,
+        .table-responsive .table td {
+            white-space: nowrap;
+        }
+        .table-responsive .table tbody tr td:before {
+            content: attr(data-label);
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    }
+');
 ?>
 <div class="noc-gia-index">
     <div id="ajaxCrudDatatable">
@@ -50,12 +63,13 @@ CrudAsset::register($this);
                 $fullExportMenu,
                 ['content'=>
                     Html::a('<i class="fa fa-plus"></i> Thêm mới', ['create'],
-                    ['title'=> 'Thêm mới ','class'=>'btn btn-success'])
+                    ['data-pjax'=>0,'title'=> 'Thêm mới','class'=>'btn btn-success'])
                 ],
-            ],          
+            ],
             'striped' => true,
             'condensed' => true,
-            'responsive' => false,
+//            'responsive' => false,
+            'responsiveWrap' => false,
             'panelPrefix' => 'block ',
             'toolbarContainerOptions' => ['class' => 'float-right'],
             'summaryOptions' => ['class' => 'float-right'],
@@ -65,7 +79,9 @@ CrudAsset::register($this);
                 'summaryOptions' => ['class' => 'block-options'],
                 'titleOptions' => ['class' => 'block-title'] ,
                 'heading' => '<i class="fa fa-list"></i> ' .  $this->title ,
-            ]
+            ],
+            'tableOptions' => ['class' => 'table table-striped'],
+            'layout' => "{items}\n{pager}",
         ])?>
     </div>
 </div>

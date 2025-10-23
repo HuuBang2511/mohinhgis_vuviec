@@ -12,7 +12,7 @@
     <div class="content py-0">
         <div class="row font-size-sm">
             <div class="col-sm-6 order-sm-1 mb-1 mb-sm-0 text-center text-sm-left">
-                <?= date('Y') ?> © <a href="#" target="_blank" class="text-uppercase font-w600">Quản lý khiếu kiện, khiếu nại </a>
+                <?= date('Y') ?> © <a href="#" target="_blank" class="text-uppercase font-w600">HỆ THỐNG QUẢN LÝ ĐIỂM NÓNG </a>
             </div>
         </div>
     </div>

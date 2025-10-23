@@ -12,7 +12,7 @@ use yii\widgets\Breadcrumbs;
 use \app\modules\assets\AppAsset;
 
 AppAsset::register($this);
-$this->title = 'Quản lý khiếu nại, khiếu kiện';
+$this->title = 'HỆ THỐNG QUẢN LÝ ĐIỂM NÓNG';
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>

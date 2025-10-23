@@ -1,7 +1,7 @@
 <?php
 
 namespace app\modules\quanly\models\danhmuc;
-
+use app\modules\quanly\base\QuanlyBaseModel;
 use Yii;
 
 /**
@@ -15,7 +15,7 @@ use Yii;
  * @property int|null $created_by
  * @property int|null $updated_by
  */
-class DmQuanhechuho extends \yii\db\ActiveRecord
+class DmQuanhechuho extends QuanlyBaseModel
 {
     /**
      * {@inheritdoc}
@@ -45,7 +45,7 @@ class DmQuanhechuho extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'ten' => 'Ten',
+            'ten' => 'Tên',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

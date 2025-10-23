@@ -14,7 +14,20 @@ $this->title = (isset($const['title'])) ? $const['title'] : 'Thông tin cư trú
 $this->params['breadcrumbs'][] = $this->title;
 
 CrudAsset::register($this);
-
+$this->registerCss('
+    @media (max-width: 767px) {
+        .table-responsive .table th,
+        .table-responsive .table td {
+            white-space: nowrap;
+        }
+        .table-responsive .table tbody tr td:before {
+            content: attr(data-label);
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    }
+');
 ?>
 <div class="thongtin-cutru-index">
     <div id="ajaxCrudDatatable">
@@ -43,19 +56,20 @@ CrudAsset::register($this);
         <?=GridView::widget([
             'id'=>'crud-datatable',
             'dataProvider' => $dataProvider,
-            //'filterModel' => $searchModel,
+            'filterModel' => $searchModel,
             'pjax'=>true,
             'columns' => require(__DIR__.'/_columns.php'),
             'toolbar'=> [
                 $fullExportMenu,
-                // ['content'=>
-                //     Html::a('<i class="fa fa-plus"></i> Thêm mới', ['create'],
-                //     ['role'=>'modal-remote','title'=> 'Thêm mới ','class'=>'btn btn-success'])
-                // ],
-            ],          
+                ['content'=>
+                    Html::a('<i class="fa fa-plus"></i> Thêm mới', ['create'],
+                    ['data-pjax'=>0,'title'=> 'Thêm mới','class'=>'btn btn-success'])
+                ],
+            ],
             'striped' => true,
             'condensed' => true,
-            'responsive' => false,
+//            'responsive' => false,
+            'responsiveWrap' => false,
             'panelPrefix' => 'block ',
             'toolbarContainerOptions' => ['class' => 'float-right'],
             'summaryOptions' => ['class' => 'float-right'],
@@ -65,7 +79,9 @@ CrudAsset::register($this);
                 'summaryOptions' => ['class' => 'block-options'],
                 'titleOptions' => ['class' => 'block-title'] ,
                 'heading' => '<i class="fa fa-list"></i> ' .  $this->title ,
-            ]
+            ],
+            'tableOptions' => ['class' => 'table table-striped'],
+            'layout' => "{items}\n{pager}",
         ])?>
     </div>
 </div>

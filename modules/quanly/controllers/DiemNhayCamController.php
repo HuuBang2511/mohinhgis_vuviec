@@ -63,8 +63,6 @@ class DiemNhayCamController extends \app\modules\quanly\base\QuanlyBaseControlle
         $request = Yii::$app->request;
         $model = new DiemNhayCam();
 
-        //dd(CategoriesService::getCategoriesNocgia());
-
         if($model->load($request->post())){
             $model->save();
 

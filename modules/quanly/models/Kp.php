@@ -60,7 +60,7 @@ class Kp extends \yii\db\ActiveRecord
             'OBJECTID' => 'Objectid',
             'TenPhuong' => 'Ten Phuong',
             'TenQuan' => 'Ten Quan',
-            'TenKhuPho' => 'Ten Khu Pho',
+            'TenKhuPho' => 'Tên khu phố',
             'MaQuan' => 'Ma Quan',
             'MaPhuong' => 'Ma Phuong',
             'Shape_Leng' => 'Shape Leng',
