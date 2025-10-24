@@ -63,6 +63,7 @@ class DashboardController extends QuanlyBaseController
         // === 2. DANH SÁCH TÁC NGHIỆP (TRUNG TÂM CHỈ HUY) ===
         $topCanhBaoDo = VuViec::find()
             ->where(['muc_do_canh_bao' => VuViec::CANH_BAO_DO])
+            ->andWhere(['status' => 1])
             ->andWhere(['!=', 'trang_thai_hien_tai_id', $idDaGiaiQuyet])
             ->orderBy(['created_at' => SORT_DESC])
             ->limit(5)->with('linhVuc', 'nguoiDan')
@@ -81,10 +82,11 @@ class DashboardController extends QuanlyBaseController
             // Lớp An ninh
             'anNinh' => [
                 'counts' => [
-                    'Mục tiêu trọng điểm' => (int) MuctieuTrongdiem::find()->count(),
-                    'Khu vực phức tạp' => (int) KhuvucPhuctapAnNinh::find()->count(),
+                    'Mục tiêu trọng điểm' => (int) MuctieuTrongdiem::find()->where(['status' => 1])->count(),
+                    'Khu vực phức tạp' => (int) KhuvucPhuctapAnNinh::find()->where(['status' => 1])->count(),
                 ],
                 'list' => KhuvucPhuctapAnNinh::find()
+                    ->where(['status' => 1])
                     ->orderBy(['updated_at' => SORT_DESC])
                     ->limit(3)->all(),
                 'list_key' => 'ten', // Thuộc tính để hiển thị tên
@@ -94,11 +96,12 @@ class DashboardController extends QuanlyBaseController
             // Lớp Trật tự Xã hội
             'tratTuXaHoi' => [
                 'counts' => [
-                    'Điểm tệ nạn' => (int) DiemTenannxh::find()->count(),
-                    'Cơ sở KD có ĐK' => (int) CosokinhdoanhCodk::find()->count(),
+                    'Điểm tệ nạn' => (int) DiemTenannxh::find()->where(['status' => 1])->count(),
+                    'Cơ sở KD có ĐK' => (int) CosokinhdoanhCodk::find()->where(['status' => 1])->count(),
                 ],
                 'list' => CosokinhdoanhCodk::find()
                     ->where(['IN', 'loai_hinh_kinh_doanh', ['Karaoke', 'Bar', 'Khách sạn', 'Nhà nghỉ', 'Cầm đồ']])
+                    ->andWhere(['status' => 1])
                     ->orderBy(['updated_at' => SORT_DESC])
                     ->limit(3)->all(),
                 'list_key' => 'ten_co_so',
@@ -108,11 +111,12 @@ class DashboardController extends QuanlyBaseController
             // Lớp Quản lý Dân cư
             'quanLyDanCu' => [
                 'counts' => [
-                    'Tổng nhân khẩu' => (int) NguoiDan::find()->count(),
+                    'Tổng nhân khẩu' => (int) NguoiDan::find()->where(['status' => 1])->count(),
                     'Đối tượng quan tâm' => $kpis['doiTuongQuanTam'],
                 ],
                 'list' => NguoiDan::find()
                     ->where(['!=', 'nhom_doi_tuong', 'Thường'])
+                    ->andWhere(['status' => 1])
                     ->orderBy(['updated_at' => SORT_DESC])
                     ->limit(3)->all(),
                 'list_key' => 'ho_ten',
@@ -122,11 +126,12 @@ class DashboardController extends QuanlyBaseController
             // Lớp Tuần tra - Giám sát
             'tuanTraGiamSat' => [
                 'counts' => [
-                    'Camera An ninh' => (int) CameraAnNinh::find()->count(),
-                    'Chốt tuần tra' => (int) ChotTuantre::find()->count(),
+                    'Camera An ninh' => (int) CameraAnNinh::find()->where(['status' => 1])->count(),
+                    'Chốt tuần tra' => (int) ChotTuantre::find()->where(['status' => 1])->count(),
                 ],
                 'list' => CameraAnNinh::find() // Lấy camera đang offline
                     ->where(['trang_thai' => 'Offline'])
+                    ->andWhere(['status' => 1])
                     ->orderBy(['updated_at' => SORT_DESC])
                     ->limit(3)->all(),
                 'list_key' => 'ten_diem',
@@ -138,11 +143,13 @@ class DashboardController extends QuanlyBaseController
                 'counts' => [
                     'Vụ việc đang xử lý' => (int) VuViec::find()
                         ->where(['!=', 'trang_thai_hien_tai_id', $idDaGiaiQuyet])
+                        ->andWhere(['status' => 1])
                         ->count(),
-                    'Điểm nhạy cảm' => (int) DiemNhayCam::find()->count(),
+                    'Điểm nhạy cảm' => (int) DiemNhayCam::find()->where(['status' => 1])->count(),
                 ],
-                'list' => VuViec::find() // Lấy vụ việc mới nhất
-                    ->orderBy(['created_at' => SORT_DESC])
+                'list' => VuViec::find() 
+                    ->where(['status' => 1])
+                    ->orderBy(['created_at' => SORT_DESC])// Lấy vụ việc mới nhất
                     ->limit(3)->with('linhVuc')
                     ->all(),
                 'list_key' => 'tom_tat_noi_dung',
@@ -152,12 +159,13 @@ class DashboardController extends QuanlyBaseController
             // Lớp PCCC
             'pccc' => [
                 'counts' => [
-                    'Cơ sở nguy cơ cháy' => (int) CosonguycoChayno::find()->count(),
-                    'Nguồn nước CCC' => (int) NguonNuocCcc::find()->count(),
-                    'Trụ nước CCC' => (int) TruNuocCcc::find()->count(),
+                    'Cơ sở nguy cơ cháy' => (int) CosonguycoChayno::find()->where(['status' => 1])->count(),
+                    'Nguồn nước CCC' => (int) NguonNuocCcc::find()->where(['status' => 1])->count(),
+                    'Trụ nước CCC' => (int) TruNuocCcc::find()->where(['status' => 1])->count(),
                 ],
                 'list' => CosonguycoChayno::find() // Lấy cơ sở nguy cơ cao
                     ->where(['IN', 'muc_do_nguy_co', ['Cao', 'Rất Cao']])
+                    ->andWhere(['status' => 1])
                     ->orderBy(['updated_at' => SORT_DESC])
                     ->limit(3)->all(),
                 'list_key' => 'ten_co_so',
@@ -170,6 +178,7 @@ class DashboardController extends QuanlyBaseController
         $trendData = VuViec::find()
             ->select(['ngay' => new Expression('DATE(created_at)'), 'count' => 'COUNT(*)'])
             ->where(['>=', 'created_at', new Expression('NOW() - INTERVAL \'30 days\'')])
+            ->andWhere(['status' => 1])
             ->groupBy(['ngay'])->orderBy('ngay ASC')
             ->asArray()->all();
         $trendChartLabels = [];
@@ -185,6 +194,7 @@ class DashboardController extends QuanlyBaseController
         // Biểu đồ tròn: Trạng thái xử lý
         $dataByStatus = VuViec::find()
             ->select(['trang_thai_hien_tai_id', 'count' => 'COUNT(*)'])
+            ->where(['status' => 1])
             ->groupBy('trang_thai_hien_tai_id')->with('trangThaiHienTai')
             ->asArray()->all();
         $statusChartData = [
