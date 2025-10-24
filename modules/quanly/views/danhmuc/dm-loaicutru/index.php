@@ -63,7 +63,7 @@ $this->registerCss('
                 $fullExportMenu,
                 ['content'=>
                     Html::a('<i class="fa fa-plus"></i> Thêm mới', ['create'],
-                    ['data-pjax'=>0,'title'=> 'Thêm mới','class'=>'btn btn-success'])
+                    ['role' => 'modal-remote','data-pjax'=>0,'title'=> 'Thêm mới','class'=>'btn btn-success'])
                 ],
             ],
             'striped' => true,
