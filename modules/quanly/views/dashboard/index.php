@@ -247,7 +247,10 @@ function get_badge_class($layerName, $badgeText) {
                     <div class="list-item">
                         <p class="font-semibold text-slate-700 truncate"><?= Html::encode($vuviec->tom_tat_noi_dung) ?></p>
                         <div class="flex justify-between text-sm mt-1">
-                            <span class="text-slate-500">Hạn xử lý: <span class="font-medium text-red-600"><?= Yii::$app->formatter->asDate($vuviec->han_xu_ly, 'dd/MM/yyyy') ?></span></span>
+                            <span class="text-slate-500">Hạn xử lý: <span class="font-medium text-red-600"><?= !empty($vuviec->han_xu_ly)
+    ? date('d/m/Y', strtotime(str_replace('/', '-', $vuviec->han_xu_ly)))
+    : '' ?>
+</span></span>
                             <span class="text-slate-500">Cán bộ: <span class="font-medium text-slate-600"><?= Html::encode($vuviec->canBoTiepNhan->ho_ten ?? 'N/A') ?></span></span>
                         </div>
                     </div>
