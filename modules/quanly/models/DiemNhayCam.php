@@ -39,7 +39,7 @@ class DiemNhayCam extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['tenloaihinh', 'thongtin', 'ghichu', 'geom', 'lat', 'long'], 'string'],
+            [['tenloaihinh', 'thongtin', 'ghichu', 'geom', 'lat', 'long', 'file_dinhkem', 'mota'], 'string'],
             [['vuviec_id', 'status', 'created_by', 'updated_by'], 'default', 'value' => null],
             [['vuviec_id', 'status', 'created_by', 'updated_by'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
@@ -66,6 +66,8 @@ class DiemNhayCam extends QuanlyBaseModel
             'updated_at' => 'Updated At',
             'created_by' => 'Created By',
             'updated_by' => 'Updated By',
+            'file_dinhkem' => 'File đính kèm',
+            'mota' => 'Mô tả',
         ];
     }
 

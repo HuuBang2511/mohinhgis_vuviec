@@ -260,6 +260,15 @@ class APPConfig
                 'hasChild' => false,
             ],
         ],
+        'import' => [
+            [
+                'name' => 'Import dữ liệu',
+                'icon' => 'fa fa-list',
+                'url' => 'quanly/noc-gia/import-table',
+                'key'=>'quanly.noc-gia.import-table',
+                'hasChild' => false,
+            ],
+        ],
         'map' => [
            
             [

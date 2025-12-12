@@ -41,7 +41,7 @@ class MuctieuTrongdiem extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['ten', 'loai_muctieu', 'cap_quanly', 'dia_chi', 'phuong_xa', 'quan_huyen', 'trang_thai_an_ninh', 'mo_ta', 'geom', 'created_by', 'updated_by'], 'string'],
+            [['ten', 'loai_muctieu', 'cap_quanly', 'dia_chi', 'phuong_xa', 'quan_huyen', 'trang_thai_an_ninh', 'mo_ta', 'geom', 'created_by', 'updated_by','file_dinhkem'], 'string'],
             [['lat', 'long'], 'number'],
             [['status'], 'default', 'value' => null],
             [['status'], 'integer'],
@@ -60,8 +60,8 @@ class MuctieuTrongdiem extends QuanlyBaseModel
             'loai_muctieu' => 'Loại mục tiêu',
             'cap_quanly' => 'Cấp quản lý',
             'dia_chi' => 'Địa chỉ',
-            'phuong_xa' => 'Phuong Xa',
-            'quan_huyen' => 'Quan Huyen',
+            'phuong_xa' => 'Phường xã',
+            'quan_huyen' => 'Tỉnh Thành phố',
             'trang_thai_an_ninh' => 'Trạng thái an ninh',
             'mo_ta' => 'Mô tả',
             'lat' => 'Lat',

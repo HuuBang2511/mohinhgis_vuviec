@@ -5,7 +5,7 @@ use yii\base\Model;
 use yii\web\UploadedFile;
 use app\modules\services\UtilityService;
 
-class ImportUpload extends Model
+class FormImport extends Model
 {
     public $file;
     public $link;
@@ -16,6 +16,7 @@ class ImportUpload extends Model
         return [
             [['file'], 'file', 'skipOnEmpty' => FALSE, 'extensions' => 'xlsx,xls', 'maxSize' => 1024 * 1024 * 10],
             [['table'], 'string'],
+            [['table'], 'required']
         ];
     }
 

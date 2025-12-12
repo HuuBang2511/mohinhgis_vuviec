@@ -42,7 +42,7 @@ class CosokinhdoanhCodk extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['ten_co_so', 'loai_hinh_kinh_doanh', 'chu_so_huu', 'so_dien_thoai', 'giay_phep_so', 'phuong_xa', 'quan_huyen', 'trang_thai_hoat_dong', 'geom', 'created_by', 'updated_by'], 'string'],
+            [['ten_co_so', 'loai_hinh_kinh_doanh', 'chu_so_huu', 'so_dien_thoai', 'giay_phep_so', 'phuong_xa', 'quan_huyen', 'trang_thai_hoat_dong', 'geom', 'created_by', 'updated_by', 'file_dinhkem', 'mota'], 'string'],
             [['ngay_cap', 'created_at', 'updated_at'], 'safe'],
             [['lat', 'long'], 'number'],
             [['status'], 'default', 'value' => null],
@@ -63,8 +63,8 @@ class CosokinhdoanhCodk extends QuanlyBaseModel
             'so_dien_thoai' => 'Số điện thoại',
             'giay_phep_so' => 'Giấy phép số',
             'ngay_cap' => 'Ngày cấp',
-            'phuong_xa' => 'Phuong Xa',
-            'quan_huyen' => 'Quan Huyen',
+            'phuong_xa' => 'Phường xã',
+            'quan_huyen' => 'Tỉnh Thành phố',
             'trang_thai_hoat_dong' => 'Trạng thái hoạt động',
             'lat' => 'Lat',
             'long' => 'Long',
@@ -74,6 +74,8 @@ class CosokinhdoanhCodk extends QuanlyBaseModel
             'created_by' => 'Created By',
             'updated_at' => 'Updated At',
             'updated_by' => 'Updated By',
+            'file_dinhkem' => 'File đính kèm',
+            'mota' => 'Mô tả',
         ];
     }
 }

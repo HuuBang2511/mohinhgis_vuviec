@@ -40,7 +40,7 @@ class ChotTuantre extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['ten_chot', 'loai_chot', 'don_vi_phu_trach', 'phuong_xa', 'quan_huyen', 'gio_truc', 'ghi_chu', 'geom', 'created_by', 'updated_by'], 'string'],
+            [['ten_chot', 'loai_chot', 'don_vi_phu_trach', 'phuong_xa', 'quan_huyen', 'gio_truc', 'ghi_chu', 'geom', 'created_by', 'updated_by','file_dinhkem'], 'string'],
             [['lat', 'long'], 'number'],
             [['status'], 'default', 'value' => null],
             [['status'], 'integer'],
@@ -58,8 +58,8 @@ class ChotTuantre extends QuanlyBaseModel
             'ten_chot' => 'Tên chốt',
             'loai_chot' => 'Loại chốt',
             'don_vi_phu_trach' => 'Đơn vị phụ trách',
-            'phuong_xa' => 'Phuong Xa',
-            'quan_huyen' => 'Quan Huyen',
+            'phuong_xa' => 'Phường xã',
+            'quan_huyen' => 'Tỉnh Thành phố',
             'gio_truc' => 'Giờ trực',
             'ghi_chu' => 'Ghi chú',
             'lat' => 'Lat',
@@ -70,6 +70,7 @@ class ChotTuantre extends QuanlyBaseModel
             'created_by' => 'Created By',
             'updated_at' => 'Updated At',
             'updated_by' => 'Updated By',
+            'file_dinhkem' => 'File đính kèm',
         ];
     }
 }

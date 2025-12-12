@@ -39,7 +39,7 @@ class KhuvucPhuctapAnNinh extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['ten', 'loai_khuvuc', 'muc_do_phuctap', 'phuong_xa', 'quan_huyen', 'ghi_chu', 'geom', 'created_by', 'updated_by'], 'string'],
+            [['ten', 'loai_khuvuc', 'muc_do_phuctap', 'phuong_xa', 'quan_huyen', 'ghi_chu', 'geom', 'created_by', 'updated_by','file_dinhkem'], 'string'],
             [['lat', 'long'], 'number'],
             [['status'], 'default', 'value' => null],
             [['status'], 'integer'],
@@ -57,8 +57,8 @@ class KhuvucPhuctapAnNinh extends QuanlyBaseModel
             'ten' => 'Tên',
             'loai_khuvuc' => 'Loại khu vực',
             'muc_do_phuctap' => 'Mức độ phức tạp',
-            'phuong_xa' => 'Phuong Xa',
-            'quan_huyen' => 'Quan Huyen',
+            'phuong_xa' => 'Phường xã',
+            'quan_huyen' => 'Tỉnh Thành phố',
             'ghi_chu' => 'Ghi chú',
             'lat' => 'Lat',
             'long' => 'Long',
@@ -68,6 +68,7 @@ class KhuvucPhuctapAnNinh extends QuanlyBaseModel
             'created_by' => 'Created By',
             'updated_at' => 'Updated At',
             'updated_by' => 'Updated By',
+            'file_dinhkem' => 'File đính kèm',
         ];
     }
 }

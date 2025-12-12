@@ -39,7 +39,7 @@ class DiemTenannxh extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['ten_diem', 'loai_ten_nan', 'muc_do_nguy_co', 'phuong_xa', 'quan_huyen', 'tinh_trang_xu_ly', 'geom', 'created_by', 'updated_by'], 'string'],
+            [['ten_diem', 'loai_ten_nan', 'muc_do_nguy_co', 'phuong_xa', 'quan_huyen', 'tinh_trang_xu_ly', 'geom', 'created_by', 'updated_by', 'file_dinhkem', 'motachung'], 'string'],
             [['lat', 'long'], 'number'],
             [['status'], 'default', 'value' => null],
             [['status'], 'integer'],
@@ -57,8 +57,8 @@ class DiemTenannxh extends QuanlyBaseModel
             'ten_diem' => 'Tên điểm',
             'loai_ten_nan' => 'Loại tệ nạn',
             'muc_do_nguy_co' => 'Mức độ nguy cơ',
-            'phuong_xa' => 'Phuong Xa',
-            'quan_huyen' => 'Quan Huyen',
+            'phuong_xa' => 'Phường xã',
+            'quan_huyen' => 'Tỉnh Thành phố',
             'tinh_trang_xu_ly' => 'Tình trạng xử lý',
             'lat' => 'Lat',
             'long' => 'Long',
@@ -68,6 +68,8 @@ class DiemTenannxh extends QuanlyBaseModel
             'created_by' => 'Created By',
             'updated_at' => 'Updated At',
             'updated_by' => 'Updated By',
+            'file_dinhkem' => 'File đính kèm',
+            'motachung' => 'Mô tả chung',
         ];
     }
 }

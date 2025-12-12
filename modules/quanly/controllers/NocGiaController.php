@@ -8,6 +8,7 @@ use app\modules\quanly\models\NocGiaSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 use \yii\web\Response;
 use yii\helpers\Html;
 use app\modules\services\CategoriesService;
@@ -17,12 +18,16 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use app\modules\quanly\models\ImportUpload;
+use app\modules\quanly\models\FormImport;
 use app\modules\quanly\models\danhmuc\DmGioitinh;
 use app\modules\quanly\models\danhmuc\DmQuanhechuho;
 use app\modules\quanly\models\danhmuc\DmLoaicutru;
 use app\modules\quanly\models\Phuongxa;
 use app\modules\quanly\models\Kp;
 use app\modules\quanly\models\Nguoidan;
+use app\modules\services\UtilityService;
+
+
 
 /**
  * NocGiaController implements the CRUD actions for NocGia model.
@@ -31,6 +36,213 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
 {
 
     public $title = "Nóc gia";
+
+    public function actionImportTable(){
+        $request = Yii::$app->request;
+        $fileUpload = new FormImport();
+        $errorRow = null;
+        $notification = null;
+        
+
+        $nocgia = new Nocgia();
+        $attributes = $nocgia->attributeLabels();
+
+        $phuongxa = Phuongxa::find()->select(['id', 'tenXa', 'maXa'])->indexBy('tenXa')->asArray()->all();
+        $khupho = Kp::find()->select(['id', 'TenKhuPho'])->indexBy('TenKhuPho')->asArray()->all();
+
+        if($fileUpload->load($request->post())){
+           
+            $highestRow = 0;
+            $newRecords = 0;
+            $updateRecords = 0;
+
+            $errors = false; 
+        
+            $notification = null;
+            $notification = [];
+            $fileUpload->file = UploadedFile::getInstance($fileUpload, 'file');
+
+            $className = '\app\modules\quanly\models\\'.$fileUpload->table.'';
+            
+            $model = new $className();  
+            $attributes = $model->attributeLabels();
+           //dd($attributes);
+            
+            if($fileUpload->uploadFile()){
+                $spreadsheet = IOFactory::load($fileUpload->link);
+                $worksheet = $spreadsheet->getSheet(0);
+                $csvPath = 'uploads/files/import/csv/' . $fileUpload->file->baseName . '.csv'; 
+                
+                $transaction = Yii::$app->db->beginTransaction();
+                try{
+
+                    $highestRow = $worksheet->getHighestRow();
+                    $highestColumn = $worksheet->getHighestColumn();
+                    $highestColumnIndex = Coordinate::columnIndexFromString($highestColumn);
+
+                    if($worksheet->getHighestRow() < 2){
+                        Yii::$app->session->setFlash('noData', "Không có dữ liệu!");
+                        return $this->render('import-table', [
+                            'fileUpload' => $fileUpload,
+                            'notification' => $notification,
+                        ]);
+                    }
+                    else{
+                        
+                        for($col = 2; $col <= $highestColumnIndex; $col++){
+                            if(!in_array($worksheet->getCellByColumnAndRow($col, 1)->getValue(), $attributes)){
+                                dd($worksheet->getCellByColumnAndRow($col, 1)->getValue());
+                                Yii::$app->session->setFlash('noData', "Dữ liệu trường dữ liệu không đúng");
+                                return $this->render('import-table', [
+                                        'fileUpload' => $fileUpload,
+                                        'notification' => $notification,
+                                ]);
+                            }
+                        }
+
+                        for($row = 2; $row <= $highestRow; $row++){
+                            for($col = 2; $col <= $highestColumnIndex; $col++){
+
+                                $data[$row][$fileUpload->table][array_search($worksheet->getCellByColumnAndRow($col, 1)->getValue(),$attributes)] = 
+                                $worksheet->getCellByColumnAndRow($col, $row)->getValue();
+                            }
+
+                            $dataInput =  $data[$row][$fileUpload->table];
+
+                            $dateAttributes = ArrayHelper::index($model->getTableSchema()->columns, 'name', 'type');
+
+                            //dd( $data[$row]);
+
+                            if(isset($dateAttributes['date'])) {
+                                foreach ($dateAttributes['date'] as $dateAttribute) {
+                                    if(array_key_exists($dateAttribute->name, $dataInput)){
+                                        if($dataInput[$dateAttribute->name] != null){
+                                            //dd($dataInput[$dateAttribute->name]);
+                                            $data[$row][$fileUpload->table][$dateAttribute->name] = UtilityService::convertDateFromMaskedInput($data[$row][$fileUpload->table][$dateAttribute->name]);
+                                        }
+                                    }
+                                }
+                            }
+
+                            //dd($data[$row][$fileUpload->table]);
+
+                            if(isset($dateAttributes['decimal'])) {
+                                foreach ($dateAttributes['decimal'] as $i => $dateAttribute) {
+                                    //dd($dateAttribute->name);
+                                    if(array_key_exists($dateAttribute->name, $dataInput)){
+                                        if($dataInput[$dateAttribute->name] != null){
+                                            if(!is_numeric($dataInput[$dateAttribute->name])){
+                                                $notification[$row]['style'] = 'text-danger';
+                                                $notification[$row]['data'] = 'Dữ liệu '.$attributes[$dataInput[$dateAttribute->name]].' phải là số dòng: '. $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+                                                $errors = true;
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if(isset($dateAttributes['integer'])) {
+                                foreach ($dateAttributes['integer'] as $i => $dateAttribute) {
+                                    //dd($dateAttribute->name);
+                                    if(array_key_exists($dateAttribute->name, $dataInput)){
+                                        if($dataInput[$dateAttribute->name] != null){
+                                            if(!is_int($dataInput[$dateAttribute->name])){
+                                                $notification[$row]['style'] = 'text-danger';
+                                                $notification[$row]['data'] = 'Dữ liệu '.$attributes[$dataInput[$dateAttribute->name]].' phải là số dòng: '. $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+                                                $errors = true;
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                             if(isset($dateAttributes['bigint'])) {
+                                foreach ($dateAttributes['bigint'] as $i => $dateAttribute) {
+                                    //dd($dateAttribute->name);
+                                    if(array_key_exists($dateAttribute->name, $dataInput)){
+                                        if($dataInput[$dateAttribute->name] != null){
+                                            if(!is_int($dataInput[$dateAttribute->name])){
+                                                $notification[$row]['style'] = 'text-danger';
+                                                $notification[$row]['data'] = 'Dữ liệu '.$attributes[$dataInput[$dateAttribute->name]].' phải là số dòng: '. $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+                                                $errors = true;
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            $import = new $className();  
+                            $import->load($data[$row]);
+
+                            //dd($model::tableName());
+
+                            if (!$import->save(false)) {
+                                $notification[$lineNumber] = [
+                                    'style' => 'text-danger',
+                                    'data' => 'Lỗi lưu dữ liệu tại dòng: ' . $lineNumber,
+                                ];
+                                $errors = true; // Đánh dấu có lỗi
+                                continue;
+                            }else{
+                                $import->save();
+
+                                if(isset($import->lat) && isset($import->long)){
+                                    
+                                    if($import->lat != null && $import->long != null){
+                                        if($fileUpload->table == 'VuViec'){
+                                            $tableName = $import::tableName();
+                                            \Yii::$app->db->createCommand("UPDATE $tableName SET vi_tri_su_viec = ST_SetSRID(ST_MakePoint($import->long,$import->lat),4326) WHERE id=:id")
+                                            ->bindValue(':id', $import->id)
+                                            ->execute();
+                                        }else{
+                                            $tableName = $import::tableName();
+                                            \Yii::$app->db->createCommand("UPDATE $tableName SET geom = ST_SetSRID(ST_MakePoint($import->long,$import->lat),4326) WHERE id=:id")
+                                            ->bindValue(':id', $import->id)
+                                            ->execute();
+                                        }
+                                        
+                                    }
+                                }
+
+                                $newRecords += 1;
+                            }
+                        }
+                    }
+
+                    if ($errors) {
+                        $transaction->rollBack();
+                        Yii::$app->session->setFlash('uploadFail', 'Có lỗi trong quá trình import, không có dữ liệu nào được lưu.');
+                    } else {
+                        $transaction->commit();
+                        Yii::$app->session->setFlash('uploadSuccess', 'Import thành công '.$newRecords. ' dòng dữ liệu');
+                    }
+                }catch(Exception $e){
+                    $transaction->rollBack();
+                    Yii::$app->session->setFlash('uploadFail', "Lỗi dòng $errorRow!");
+                    return $this->render('import-table',[
+                        'fileUpload' => $fileUpload,
+                        'errorRow' => $errorRow,
+                        'notification' => $notification,
+                    ]);
+                }
+            }
+
+            return $this->render('import-table', [
+                'check' => null,
+                'fileUpload' => $fileUpload,
+                'notification' => $notification,
+            ]);
+        }
+
+        return $this->render('import-table', [
+            'check' => null,
+            'fileUpload' => $fileUpload,
+            'notification' => $notification,
+        ]);
+    }
 
     public function actionImport(){
         $request = Yii::$app->request;
@@ -105,6 +317,8 @@ class NocGiaController extends \app\modules\quanly\base\QuanlyBaseController
                     $currentHogiadinhid = null;
 
                     foreach ($file as $row) {
+
+                        
 
                         $lineNumber++;
                     

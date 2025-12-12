@@ -39,7 +39,7 @@ class CosonguycoChayno extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['ten_co_so', 'loai_hinh', 'muc_do_nguy_co', 'phuong_xa', 'quan_huyen', 'don_vi_quan_ly', 'geom', 'created_by', 'updated_by'], 'string'],
+            [['ten_co_so', 'loai_hinh', 'muc_do_nguy_co', 'phuong_xa', 'quan_huyen', 'don_vi_quan_ly', 'geom', 'created_by', 'updated_by','file_dinhkem', 'mota'], 'string'],
             [['lat', 'long'], 'number'],
             [['status'], 'default', 'value' => null],
             [['status'], 'integer'],
@@ -57,8 +57,8 @@ class CosonguycoChayno extends QuanlyBaseModel
             'ten_co_so' => 'Tên cơ sở',
             'loai_hinh' => 'Loại hình',
             'muc_do_nguy_co' => 'Mức độ nguy cơ',
-            'phuong_xa' => 'Phuong Xa',
-            'quan_huyen' => 'Quan Huyen',
+            'phuong_xa' => 'Phường xã',
+            'quan_huyen' => 'Tỉnh Thành phố',
             'don_vi_quan_ly' => 'Đơn vị quản lý',
             'lat' => 'Lat',
             'long' => 'Long',
@@ -68,6 +68,8 @@ class CosonguycoChayno extends QuanlyBaseModel
             'created_by' => 'Created By',
             'updated_at' => 'Updated At',
             'updated_by' => 'Updated By',
+            'file_dinhkem' => 'File đính kèm',
+            'mota' => 'Mô tả',
         ];
     }
 }

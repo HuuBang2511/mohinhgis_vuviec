@@ -350,6 +350,11 @@ class VuViecController extends \app\modules\quanly\base\QuanlyBaseController
 
             //dd($model);
 
+            if($model->ma_dvhc_phuongxa != null){
+                $vuviecDaco = VuViec::find()->where(['status' => 1])->andWhere(['ma_dvhc_phuongxa' => $model->ma_dvhc_phuongxa])->count();
+                $model->ma_vu_viec = $model->ma_dvhc_phuongxa.'_'.$vuviecDaco;
+            }
+
             $filedinhkemNguoidan->fileupload = UploadedFile::getInstances($filedinhkemNguoidan, 'fileupload');
 
             if($filedinhkemNguoidan->fileupload != null){
@@ -413,6 +418,12 @@ class VuViecController extends \app\modules\quanly\base\QuanlyBaseController
         }
 
         if ($request->isPost  && $model->load($request->post()) && $filedinhkem->load($request->post()) && $congdan->load($request->post()) &&!Yii::$app->user->identity->is_nguoidan) {
+
+            if($model->ma_dvhc_phuongxa != null){
+                $vuviecDaco = VuViec::find()->where(['status' => 1])->andWhere(['ma_dvhc_phuongxa' => $model->ma_dvhc_phuongxa])->count();
+                $model->ma_vu_viec = $model->ma_dvhc_phuongxa.'_'.$vuviecDaco;
+            }
+
             $oldIDs = ArrayHelper::map($lichsus, 'id', 'id');
             $lichsus = QuanlyBaseModel::updateMultiple(LichSuXuLy::classname(), $lichsus);
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($lichsus, 'id', 'id')));

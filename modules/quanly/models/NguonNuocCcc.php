@@ -39,7 +39,7 @@ class NguonNuocCcc extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['ten_nguon', 'loai_nguon', 'tinh_trang', 'phuong_xa', 'quan_huyen', 'geom', 'created_by', 'updated_by'], 'string'],
+            [['ten_nguon', 'loai_nguon', 'tinh_trang', 'phuong_xa', 'quan_huyen', 'geom', 'created_by', 'updated_by','file_dinhkem', 'mota','file_dinhkem'], 'string'],
             [['dung_tich_m3', 'lat', 'long'], 'number'],
             [['status'], 'default', 'value' => null],
             [['status'], 'integer'],
@@ -58,8 +58,8 @@ class NguonNuocCcc extends QuanlyBaseModel
             'loai_nguon' => 'Loại nguồn',
             'dung_tich_m3' => 'Dung tích',
             'tinh_trang' => 'Tình trạng',
-            'phuong_xa' => 'Phuong Xa',
-            'quan_huyen' => 'Quan Huyen',
+            'phuong_xa' => 'Phường xã',
+            'quan_huyen' => 'Tỉnh Thành phố',
             'lat' => 'Lat',
             'long' => 'Long',
             'geom' => 'Geom',
@@ -68,6 +68,8 @@ class NguonNuocCcc extends QuanlyBaseModel
             'created_by' => 'Created By',
             'updated_at' => 'Updated At',
             'updated_by' => 'Updated By',
+            'file_dinhkem' => 'File đính kèm',
+            'mota' => 'Mô tả',
         ];
     }
 }

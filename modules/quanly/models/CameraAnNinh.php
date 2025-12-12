@@ -41,7 +41,7 @@ class CameraAnNinh extends QuanlyBaseModel
     public function rules()
     {
         return [
-            [['ma_camera', 'ten_diem', 'dia_chi', 'phuong_xa', 'quan_huyen', 'don_vi_quan_ly', 'trang_thai', 'nguon_du_lieu', 'geom', 'created_by', 'updated_by'], 'string'],
+            [['ma_camera', 'ten_diem', 'dia_chi', 'phuong_xa', 'quan_huyen', 'don_vi_quan_ly', 'trang_thai', 'nguon_du_lieu', 'geom', 'created_by', 'updated_by','file_dinhkem'], 'string'],
             [['lat', 'long'], 'number'],
             [['status'], 'default', 'value' => null],
             [['status'], 'integer'],
@@ -59,8 +59,8 @@ class CameraAnNinh extends QuanlyBaseModel
             'ma_camera' => 'Mã camera',
             'ten_diem' => 'Tên điểm',
             'dia_chi' => 'Địa chỉ',
-            'phuong_xa' => 'Phuong Xa',
-            'quan_huyen' => 'Quan Huyen',
+            'phuong_xa' => 'Phường xã',
+            'quan_huyen' => 'Tỉnh Thành phố',
             'don_vi_quan_ly' => 'Đơn vị quản lý',
             'trang_thai' => 'Trạng thái',
             'nguon_du_lieu' => 'Nguồn dữ liệu',
@@ -72,6 +72,7 @@ class CameraAnNinh extends QuanlyBaseModel
             'created_by' => 'Created By',
             'updated_at' => 'Updated At',
             'updated_by' => 'Updated By',
+            'file_dinhkem' => 'File đính kèm',
         ];
     }
 }
