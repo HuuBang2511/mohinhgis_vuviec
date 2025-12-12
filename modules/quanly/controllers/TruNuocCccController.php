@@ -10,6 +10,8 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use \yii\web\Response;
 use yii\helpers\Html;
+use yii\web\UploadedFile;
+use app\modules\quanly\base\UploadFile;
 
 /**
  * TruNuocCccController implements the CRUD actions for TruNuocCcc model.
@@ -60,14 +62,39 @@ class TruNuocCccController extends \app\modules\quanly\base\QuanlyBaseController
         $request = Yii::$app->request;
         $model = new TruNuocCcc();
 
-         if($model->load($request->post()) && $model->save()){
-        
+        $filedinhkem = new UploadFile();
+
+        if($model->load($request->post()) && $model->save() && $filedinhkem->load($request->post())){
+            
+            $filedinhkem->fileupload = UploadedFile::getInstances($filedinhkem, 'fileupload');
+
+            if($filedinhkem->fileupload != null){
+                //dd($filedinhkem->fileupload);
+                $file = [];
+                foreach($filedinhkem->fileupload as $i => $item){
+                    if(strpos($item->name, "'") == true){
+                        $item->name = str_replace("'","_",$item->name);
+                    }
+
+                    $file[] = 'uploads/trunuocpccc/'.$model->id.'/'.$item->baseName.'.'.$item->extension;
+                    $path = 'uploads/trunuocpccc/'.$model->id.'/';
+                    
+                    $tailieu->save();
+
+                    $filedinhkem->uploadFile($path, $item);
+                }
+
+                $model->file_dinhkem = json_encode($file);
+                $model->save();
+            }
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
 
         return $this->render('create', [
             'model' => $model,
+            'filedinhkem' => $filedinhkem,
         ]);
 
     }
@@ -83,14 +110,38 @@ class TruNuocCccController extends \app\modules\quanly\base\QuanlyBaseController
     {
         $request = Yii::$app->request;
         $model = $this->findModel($id);
+        $filedinhkem = new UploadFile();
 
-        if($model->load($request->post()) && $model->save()){
-        
+        if($model->load($request->post()) && $model->save() && $filedinhkem->load($request->post())){
+            
+            $filedinhkem->fileupload = UploadedFile::getInstances($filedinhkem, 'fileupload');
+
+            if($filedinhkem->fileupload != null){
+                //dd($filedinhkem->fileupload);
+                $file = [];
+                foreach($filedinhkem->fileupload as $i => $item){
+                    if(strpos($item->name, "'") == true){
+                        $item->name = str_replace("'","_",$item->name);
+                    }
+
+                    $file[] = 'uploads/trunuocpccc/'.$model->id.'/'.$item->baseName.'.'.$item->extension;
+                    $path = 'uploads/trunuocpccc/'.$model->id.'/';
+                    
+                    $tailieu->save();
+
+                    $filedinhkem->uploadFile($path, $item);
+                }
+
+                $model->file_dinhkem = json_encode($file);
+                $model->save();
+            }
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'filedinhkem' => $filedinhkem,
         ]);
     }
 

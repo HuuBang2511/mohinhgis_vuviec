@@ -34,6 +34,19 @@ $this->params['breadcrumbs'][] = $this->title;
 <!-- JS -->
 <script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
 
+<?php 
+    if($model->file_dinhkem != null){
+        $file = [];
+        $model->file_dinhkem = json_decode($model->file_dinhkem, true);
+
+        foreach($model->file_dinhkem as $i => $item){
+            $file[] = Yii::$app->homeUrl.$item;
+        }
+    }
+
+    
+?>
+
 <?php $form = ActiveForm::begin([
     'fieldConfig' => [
         'errorOptions' => ['encode' => false],
@@ -59,6 +72,71 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $form->field($model, 'ap_suat_psi')->textInput(['maxlength' => true]) ?>
             </div>
         </div>
+
+        <div class="row">
+            <div class="tab-pane" id="filedinhkem-view">
+                <div class="row px-3">
+                    <?php if($model->isNewRecord): ?>
+                    <div class="col-lg-12">
+                        <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                                    'options'=>[
+                                        'multiple'=>true
+                                    ],
+                                    'pluginOptions' => [
+                                        'initialPreviewAsData' => true,
+                                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                                        'showPreview' => true,
+                                        'showCaption' => true,
+                                        'showRemove' => true,
+                                        'showUpload' => false,
+                                    ]
+                                ])->label('File đính kèm');
+                            ?>
+                    </div>
+                    <?php else: ?>
+                    <?php if($model->file_dinhkem != null): ?>
+                    <div class="col-lg-12">
+                        <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                                    'options'=>[
+                                        'multiple'=>true
+                                    ],
+                                    'pluginOptions' => [
+                                        'overwriteInitial' => true,
+                                        'initialPreview' => $file,
+                                        'initialPreviewAsData' => true,
+                                        'initialPreviewFileType' => 'pdf',
+                                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                                        'showPreview' => true,
+                                        'showCaption' => true,
+                                        'showRemove' => true,
+                                        'showUpload' => false,
+                                    ]
+                                ])->label('File đính kèm');
+                        ?>
+                    </div>
+                    <?php else: ?>
+                    <div class="col-lg-12">
+                        <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                                    'options'=>[
+                                        'multiple'=>true
+                                    ],
+                                    'pluginOptions' => [
+                                        'initialPreviewAsData' => true,
+                                        'allowedFileExtensions' =>['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                                        'showPreview' => true,
+                                        'showCaption' => true,
+                                        'showRemove' => true,
+                                        'showUpload' => false,
+                                    ]
+                                ])->label('File đính kèm');
+                            ?>
+                    </div>
+                    <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
         <div class="row mt-3">
             <div class="col-lg-6">
                 <?= $form->field($model, 'lat')->input('text', ['id' => 'geox-input']) ?>
@@ -85,9 +163,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <script>
 var map = L.map('map').setView([
-     <?= ($model->lat != null) ? $model->lat : 20.473381288809428 ?>,
+    <?= ($model->lat != null) ? $model->lat : 20.473381288809428 ?>,
     <?= ($model->long != null) ? $model->long : 106.31907196809175 ?>
-   
+
 ], 16);
 
 // Lớp nền
@@ -103,9 +181,10 @@ var vetinh = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', 
 });
 
 
-L.control.layers(
-    {"ggMap": googleMap, "Vệ tinh": vetinh },
-).addTo(map);
+L.control.layers({
+    "ggMap": googleMap,
+    "Vệ tinh": vetinh
+}, ).addTo(map);
 
 
 // Tạo marker
@@ -129,7 +208,7 @@ const marker = new L.marker([<?= ($model->lat != null) ? $model->lat : 20.473381
 }).addTo(map);
 
 // Cập nhật input khi kéo marker
-marker.on('dragend', function (event) {
+marker.on('dragend', function(event) {
     const position = event.target.getLatLng();
     isManualPosition = true; // đánh dấu người dùng tự chỉnh
     $('#geoy-input').val(position.lng);
@@ -164,7 +243,7 @@ const locateControl = L.control.locate({
 setTimeout(() => {
     const btn = document.querySelector('.leaflet-control-locate a');
     if (btn) {
-        const handleLocate = function (e) {
+        const handleLocate = function(e) {
             e.preventDefault();
             isManualPosition = false;
             map.locate({
@@ -207,8 +286,4 @@ map.on("locationfound", function(e) {
         map.setView(current, 18);
     }
 });
-
-
-
 </script>
-
