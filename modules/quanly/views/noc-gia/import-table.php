@@ -59,7 +59,7 @@ CrudAsset::register($this);
                                     'MuctieuTrongdiem' => 'Mục tiêu trọng điểm',
                                     'NguonNuocCcc' => 'Nguồn nước PCCC',
                                     'TruNuocCcc' => 'Trụ nước PCCC',
-                                    'VuViec' => 'Vụ Việc',
+                                    //'VuViec' => 'Vụ Việc',
                                 ],  
                                 'options' => ['prompt' => 'Chọn bảng dữ liệu', 'id' => 'phuongxa-id'],
                                 'pluginOptions' => [
