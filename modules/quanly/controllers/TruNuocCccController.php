@@ -45,9 +45,27 @@ class TruNuocCccController extends \app\modules\quanly\base\QuanlyBaseController
     public function actionView($id)
     {
         $request = Yii::$app->request;
+        $model = $this->findModel($id);
+
+        if($model->file_dinhkem != null){
+            $filedinhkem = json_decode($model->file_dinhkem);
+
+            $files = [];
+
+            foreach($filedinhkem as $i => $item){
+
+                $filename = basename($item); // HDSD 1.2.pdf
+                $filename = str_replace(' ', '_', $filename); // HDSD_1.2.pdf
+
+                $files[$i]['url'] = $item;
+                $files[$i]['name'] = $filename;
+                
+            }
+        }
 
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'files' => $files,
         ]);
     }
 
@@ -78,8 +96,6 @@ class TruNuocCccController extends \app\modules\quanly\base\QuanlyBaseController
 
                     $file[] = 'uploads/trunuocpccc/'.$model->id.'/'.$item->baseName.'.'.$item->extension;
                     $path = 'uploads/trunuocpccc/'.$model->id.'/';
-                    
-                    $tailieu->save();
 
                     $filedinhkem->uploadFile($path, $item);
                 }
@@ -126,8 +142,7 @@ class TruNuocCccController extends \app\modules\quanly\base\QuanlyBaseController
 
                     $file[] = 'uploads/trunuocpccc/'.$model->id.'/'.$item->baseName.'.'.$item->extension;
                     $path = 'uploads/trunuocpccc/'.$model->id.'/';
-                    
-                    $tailieu->save();
+                
 
                     $filedinhkem->uploadFile($path, $item);
                 }

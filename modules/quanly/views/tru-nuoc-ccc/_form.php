@@ -10,6 +10,7 @@ use kartik\select2\Select2;
 use yii\widgets\MaskedInput;
 use kartik\depdrop\DepDrop;
 use app\widgets\maps\LeafletMapAsset;
+use kartik\file\FileInput;
 
 LeafletMapAsset::register($this);
 
