@@ -10,6 +10,8 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use \yii\web\Response;
 use yii\helpers\Html;
+use yii\web\UploadedFile;
+use app\modules\quanly\base\UploadFile;
 
 /**
  * DiemTenannxhController implements the CRUD actions for DiemTenannxh model.
@@ -43,9 +45,27 @@ class DiemTenannxhController extends \app\modules\quanly\base\QuanlyBaseControll
     public function actionView($id)
     {
         $request = Yii::$app->request;
+        $model = $this->findModel($id);
+
+        if($model->file_dinhkem != null){
+            $filedinhkem = json_decode($model->file_dinhkem);
+
+            $files = [];
+
+            foreach($filedinhkem as $i => $item){
+
+                $filename = basename($item); // HDSD 1.2.pdf
+                $filename = str_replace(' ', '_', $filename); // HDSD_1.2.pdf
+
+                $files[$i]['url'] = $item;
+                $files[$i]['name'] = $filename;
+                
+            }
+        }
 
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'files' => $files,
         ]);
     }
 
@@ -60,14 +80,37 @@ class DiemTenannxhController extends \app\modules\quanly\base\QuanlyBaseControll
         $request = Yii::$app->request;
         $model = new DiemTenannxh();
 
-        if($model->load($request->post()) && $model->save()){
-        
+        $filedinhkem = new UploadFile();
+
+        if($model->load($request->post()) && $model->save() && $filedinhkem->load($request->post())){
+            
+            $filedinhkem->fileupload = UploadedFile::getInstances($filedinhkem, 'fileupload');
+
+            if($filedinhkem->fileupload != null){
+                //dd($filedinhkem->fileupload);
+                $file = [];
+                foreach($filedinhkem->fileupload as $i => $item){
+                    if(strpos($item->name, "'") == true){
+                        $item->name = str_replace("'","_",$item->name);
+                    }
+
+                    $file[] = 'uploads/diemtenan/'.$model->id.'/'.$item->baseName.'.'.$item->extension;
+                    $path = 'uploads/diemtenan/'.$model->id.'/';
+
+                    $filedinhkem->uploadFile($path, $item);
+                }
+
+                $model->file_dinhkem = json_encode($file);
+                $model->save();
+            }
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
 
         return $this->render('create', [
             'model' => $model,
+            'filedinhkem' => $filedinhkem,
         ]);
 
     }
@@ -84,13 +127,36 @@ class DiemTenannxhController extends \app\modules\quanly\base\QuanlyBaseControll
         $request = Yii::$app->request;
         $model = $this->findModel($id);
 
-        if($model->load($request->post()) && $model->save()){
-        
+        $filedinhkem = new UploadFile();
+
+        if($model->load($request->post()) && $model->save() && $filedinhkem->load($request->post())){
+            
+            $filedinhkem->fileupload = UploadedFile::getInstances($filedinhkem, 'fileupload');
+
+            if($filedinhkem->fileupload != null){
+                //dd($filedinhkem->fileupload);
+                $file = [];
+                foreach($filedinhkem->fileupload as $i => $item){
+                    if(strpos($item->name, "'") == true){
+                        $item->name = str_replace("'","_",$item->name);
+                    }
+
+                    $file[] = 'uploads/diemtenan/'.$model->id.'/'.$item->baseName.'.'.$item->extension;
+                    $path = 'uploads/diemtenan/'.$model->id.'/';
+
+                    $filedinhkem->uploadFile($path, $item);
+                }
+
+                $model->file_dinhkem = json_encode($file);
+                $model->save();
+            }
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'filedinhkem' => $filedinhkem,
         ]);
     }
 

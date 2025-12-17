@@ -10,7 +10,7 @@ use kartik\select2\Select2;
 use yii\widgets\MaskedInput;
 use kartik\depdrop\DepDrop;
 use app\widgets\maps\LeafletMapAsset;
-
+use kartik\file\FileInput;
 LeafletMapAsset::register($this);
 
 /* @var $this yii\web\View */
@@ -27,6 +27,17 @@ $this->params['breadcrumbs'][] = ['label' => $label['index'].' '.$controller->ti
 $this->params['breadcrumbs'][] = $this->title;
 
 
+?>
+
+<?php 
+    if($model->file_dinhkem != null){
+        $file = [];
+        $model->file_dinhkem = json_decode($model->file_dinhkem, true);
+
+        foreach($model->file_dinhkem as $i => $item){
+            $file[] = Yii::$app->homeUrl.$item;
+        }
+    }
 ?>
 
 <!-- CSS -->

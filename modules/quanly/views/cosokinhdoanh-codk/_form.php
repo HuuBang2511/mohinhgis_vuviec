@@ -11,6 +11,7 @@ use kartik\select2\Select2;
 use kartik\depdrop\DepDrop;
 use app\widgets\maps\LeafletMapAsset;
 use app\widgets\maskedinput\MaskedInput;
+use kartik\file\FileInput;
 
 LeafletMapAsset::register($this);
 
@@ -29,6 +30,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 ?>
+
+<?php 
+    if($model->file_dinhkem != null){
+        $file = [];
+        $model->file_dinhkem = json_decode($model->file_dinhkem, true);
+
+        foreach($model->file_dinhkem as $i => $item){
+            $file[] = Yii::$app->homeUrl.$item;
+        }
+    }
+?>s
 
 <!-- CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
