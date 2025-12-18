@@ -10,5 +10,6 @@ use yii\helpers\Html;
 <div class="camera-an-ninh-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'filedinhkem' => $filedinhkem,
     ]) ?>
 </div>

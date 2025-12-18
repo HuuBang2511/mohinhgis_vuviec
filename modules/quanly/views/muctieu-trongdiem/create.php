@@ -10,5 +10,6 @@ use yii\helpers\Html;
 <div class="muctieu-trongdiem-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'filedinhkem' => $filedinhkem,
     ]) ?>
 </div>

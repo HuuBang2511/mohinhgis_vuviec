@@ -10,5 +10,6 @@ use yii\helpers\Html;
 <div class="diem-trong-diem-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'filedinhkem' => $filedinhkem,
     ]) ?>
 </div>

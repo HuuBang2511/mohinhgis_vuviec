@@ -10,5 +10,6 @@ use yii\helpers\Html;
 <div class="diem-nhay-cam-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'filedinhkem' => $filedinhkem,
     ]) ?>
 </div>

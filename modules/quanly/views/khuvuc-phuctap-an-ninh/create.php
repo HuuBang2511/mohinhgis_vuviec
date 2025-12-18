@@ -10,5 +10,6 @@ use yii\helpers\Html;
 <div class="khuvuc-phuctap-an-ninh-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'filedinhkem' => $filedinhkem,
     ]) ?>
 </div>

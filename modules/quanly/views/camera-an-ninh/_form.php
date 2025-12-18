@@ -10,6 +10,7 @@ use kartik\select2\Select2;
 use yii\widgets\MaskedInput;
 use kartik\depdrop\DepDrop;
 use app\widgets\maps\LeafletMapAsset;
+use kartik\file\FileInput;
 
 LeafletMapAsset::register($this);
 
@@ -27,6 +28,17 @@ $this->params['breadcrumbs'][] = ['label' => $label['index'].' '.$controller->ti
 $this->params['breadcrumbs'][] = $this->title;
 
 
+?>
+
+<?php 
+    if($model->file_dinhkem != null){
+        $file = [];
+        $model->file_dinhkem = json_decode($model->file_dinhkem, true);
+
+        foreach($model->file_dinhkem as $i => $item){
+            $file[] = Yii::$app->homeUrl.$item;
+        }
+    }
 ?>
 
 <!-- CSS -->
@@ -75,6 +87,70 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="row mt-3">
             <div class="col-lg-12">
                 <?= $form->field($model, 'nguon_du_lieu')->textInput(['maxlength' => true]) ?>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="tab-pane" id="filedinhkem-view">
+                <div class="row px-3">
+                    <?php if($model->isNewRecord): ?>
+                    <div class="col-lg-12">
+                        <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                                    'options'=>[
+                                        'multiple'=>true
+                                    ],
+                                    'pluginOptions' => [
+                                        'initialPreviewAsData' => true,
+                                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                                        'showPreview' => true,
+                                        'showCaption' => true,
+                                        'showRemove' => true,
+                                        'showUpload' => false,
+                                    ]
+                                ])->label('File đính kèm');
+                            ?>
+                    </div>
+                    <?php else: ?>
+                    <?php if($model->file_dinhkem != null): ?>
+                    <div class="col-lg-12">
+                        <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                                    'options'=>[
+                                        'multiple'=>true
+                                    ],
+                                    'pluginOptions' => [
+                                        'overwriteInitial' => true,
+                                        'initialPreview' => $file,
+                                        'initialPreviewAsData' => true,
+                                        'initialPreviewFileType' => 'pdf',
+                                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                                        'showPreview' => true,
+                                        'showCaption' => true,
+                                        'showRemove' => true,
+                                        'showUpload' => false,
+                                    ]
+                                ])->label('File đính kèm');
+                        ?>
+                    </div>
+                    <?php else: ?>
+                    <div class="col-lg-12">
+                        <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                                    'options'=>[
+                                        'multiple'=>true
+                                    ],
+                                    'pluginOptions' => [
+                                        'initialPreviewAsData' => true,
+                                        'allowedFileExtensions' =>['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                                        'showPreview' => true,
+                                        'showCaption' => true,
+                                        'showRemove' => true,
+                                        'showUpload' => false,
+                                    ]
+                                ])->label('File đính kèm');
+                            ?>
+                    </div>
+                    <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 
