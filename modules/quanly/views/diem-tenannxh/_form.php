@@ -74,6 +74,71 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $form->field($model, 'tinh_trang_xu_ly')->textInput(['maxlength' => true]) ?>
             </div>
         </div>
+
+        <div class="row">
+            <div class="tab-pane" id="filedinhkem-view">
+                <div class="row px-3">
+                    <?php if($model->isNewRecord): ?>
+                    <div class="col-lg-12">
+                        <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                                    'options'=>[
+                                        'multiple'=>true
+                                    ],
+                                    'pluginOptions' => [
+                                        'initialPreviewAsData' => true,
+                                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                                        'showPreview' => true,
+                                        'showCaption' => true,
+                                        'showRemove' => true,
+                                        'showUpload' => false,
+                                    ]
+                                ])->label('File đính kèm');
+                            ?>
+                    </div>
+                    <?php else: ?>
+                    <?php if($model->file_dinhkem != null): ?>
+                    <div class="col-lg-12">
+                        <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                                    'options'=>[
+                                        'multiple'=>true
+                                    ],
+                                    'pluginOptions' => [
+                                        'overwriteInitial' => true,
+                                        'initialPreview' => $file,
+                                        'initialPreviewAsData' => true,
+                                        'initialPreviewFileType' => 'pdf',
+                                        'allowedFileExtensions' => ['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                                        'showPreview' => true,
+                                        'showCaption' => true,
+                                        'showRemove' => true,
+                                        'showUpload' => false,
+                                    ]
+                                ])->label('File đính kèm');
+                        ?>
+                    </div>
+                    <?php else: ?>
+                    <div class="col-lg-12">
+                        <?= $form->field($filedinhkem, 'fileupload')->widget(FileInput::className(), [
+                                    'options'=>[
+                                        'multiple'=>true
+                                    ],
+                                    'pluginOptions' => [
+                                        'initialPreviewAsData' => true,
+                                        'allowedFileExtensions' =>['png', 'jpg', 'jpeg', 'docx', 'pdf', 'xlsx'],
+                                        'showPreview' => true,
+                                        'showCaption' => true,
+                                        'showRemove' => true,
+                                        'showUpload' => false,
+                                    ]
+                                ])->label('File đính kèm');
+                            ?>
+                    </div>
+                    <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
         <div class="row mt-3">
             <div class="col-lg-6">
                 <?= $form->field($model, 'lat')->input('text', ['id' => 'geox-input']) ?>
