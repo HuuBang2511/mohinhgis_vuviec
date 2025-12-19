@@ -57,6 +57,23 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'tinh_trang_xu_ly',
                             ],
                         ]) ?>
+
+                        <table class="table table-striped table-bordered">
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên file</th>
+                                
+                            </tr>
+                            <?php if ($files != null) : ?>
+                                <?php foreach ($files as $i => $file) : ?>
+                                    <tr>
+                                        <td><?= $i + 1 ?></td>
+                                        <td><a href="<?= Yii::$app->homeUrl . $file['url'] ?>" target="_blank"><?= $file['name'] ?></a></td>
+                                        
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </table>
                     </div>
                     <div class="col-lg-8">
                         <div id="map"></div>
