@@ -61,6 +61,8 @@ class MuctieuTrongdiemController extends \app\modules\quanly\base\QuanlyBaseCont
                 $files[$i]['name'] = $filename;
                 
             }
+        }else{
+            $files = null;
         }
 
         return $this->render('view', [

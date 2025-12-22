@@ -61,6 +61,8 @@ class KhuvucPhuctapAnNinhController extends \app\modules\quanly\base\QuanlyBaseC
                 $files[$i]['name'] = $filename;
                 
             }
+        }else{
+            $files = null;
         }
 
         return $this->render('view', [

@@ -61,6 +61,8 @@ class CameraAnNinhController extends \app\modules\quanly\base\QuanlyBaseControll
                 $files[$i]['name'] = $filename;
                 
             }
+        }else{
+            $files = null;
         }
 
         return $this->render('view', [

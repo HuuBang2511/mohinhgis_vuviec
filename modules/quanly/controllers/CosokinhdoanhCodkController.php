@@ -61,6 +61,8 @@ class CosokinhdoanhCodkController extends \app\modules\quanly\base\QuanlyBaseCon
                 $files[$i]['name'] = $filename;
                 
             }
+        }else{
+            $files = null;
         }
 
         return $this->render('view', [

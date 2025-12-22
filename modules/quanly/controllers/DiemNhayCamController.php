@@ -61,6 +61,8 @@ class DiemNhayCamController extends \app\modules\quanly\base\QuanlyBaseControlle
                 $files[$i]['name'] = $filename;
                 
             }
+        }else{
+            $files = null;
         }
 
         return $this->render('view', [

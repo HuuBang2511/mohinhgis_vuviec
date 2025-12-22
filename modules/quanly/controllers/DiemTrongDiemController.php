@@ -61,6 +61,8 @@ class DiemTrongDiemController extends \app\modules\quanly\base\QuanlyBaseControl
                 $files[$i]['name'] = $filename;
                 
             }
+        }else{
+            $files = null;
         }
 
         return $this->render('view', [

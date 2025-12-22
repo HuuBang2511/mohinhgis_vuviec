@@ -61,6 +61,8 @@ class TruNuocCccController extends \app\modules\quanly\base\QuanlyBaseController
                 $files[$i]['name'] = $filename;
                 
             }
+        }else{
+            $files = null;
         }
 
         return $this->render('view', [
