@@ -26,6 +26,7 @@ $diemTrongDiemDetailUrlBase = Url::to(['/quanly/diem-trong-diem/view']);
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
     :root {
@@ -228,6 +229,30 @@ $diemTrongDiemDetailUrlBase = Url::to(['/quanly/diem-trong-diem/view']);
     }
     /* --- Kết thúc CSS mới --- */
 
+    .report-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        text-decoration: none;
+        color: var(--text-color);
+        transition: background 0.2s, box-shadow 0.2s;
+        background: var(--background-color);
+    }
+    .report-card:hover {
+        background: var(--light-gray);
+        box-shadow: var(--shadow);
+    }
+    .report-icon {
+        width: 22px; height: 22px;
+        color: var(--primary-color);
+        flex-shrink: 0;
+    }
+    .report-card-title { font-weight: 600; font-size: 14px; }
+    .report-card-desc  { font-size: 12px; color: var(--text-light-color); margin-top: 2px; }
 
     @media screen and (max-width: 768px) {
         #tabs {
@@ -252,6 +277,7 @@ $diemTrongDiemDetailUrlBase = Url::to(['/quanly/diem-trong-diem/view']);
         <div class="tab-buttons">
             <button class="tab-button active" data-tab="layer">Lớp dữ liệu</button>
             <button class="tab-button" data-tab="info">Thông tin</button>
+            <button class="tab-button" data-tab="report">Cán bộ hiện trường/người dân</button>
         </div>
 
         <div id="layer-content" class="tab-content active">
@@ -516,6 +542,46 @@ $diemTrongDiemDetailUrlBase = Url::to(['/quanly/diem-trong-diem/view']);
             <div class="section-title">Thông tin chi tiết</div>
             <div id="feature-details"><p>Nhấn vào một đối tượng trên bản đồ để xem thông tin.</p></div>
         </div>
+        <div id="report-content" class="tab-content">
+            <div class="section-title">Tham gia bản đồ số</div>
+            <p style="font-size:13px; color:var(--text-light-color); margin-bottom:1rem;">
+                Chọn loại thông tin bạn muốn báo cáo. Không cần đăng nhập.
+            </p>
+
+            <a href="<?= Url::to(['/quanly/diem-nhay-cam/create', 'ref' => 'map']) ?>" class="report-card">
+                <i data-lucide="alert-triangle" class="report-icon"></i>
+                <div>
+                    <div class="report-card-title">Điểm phản ánh của dân</div>
+                    <div class="report-card-desc">Báo cáo khu vực nhạy cảm cần chú ý</div>
+                </div>
+                <i data-lucide="chevron-right" style="margin-left:auto; flex-shrink:0;"></i>
+            </a>
+
+            <a href="<?= Url::to(['/quanly/diem-trong-diem/create', 'ref' => 'map']) ?>" class="report-card">
+                <i data-lucide="focus" class="report-icon"></i>
+                <div>
+                    <div class="report-card-title">Điểm về môi trường</div>
+                    <div class="report-card-desc">Đánh dấu địa điểm trọng điểm về rác thải</div>
+                </div>
+                <i data-lucide="chevron-right" style="margin-left:auto; flex-shrink:0;"></i>
+            </a>
+
+            <!-- QR Code nằm trong tab, tự động hiện -->
+            <div style="margin-top:20px; border-top:1px solid var(--border-color); padding-top:16px; text-align:center;">
+                <p style="font-size:13px; font-weight:600; margin:0 0 12px; color:var(--text-color);">
+                    <i data-lucide="qr-code" style="width:15px;height:15px;vertical-align:middle;margin-right:5px;"></i>
+                    Quét QR để truy cập bản đồ
+                </p>
+                <div id="qr-canvas" style="display:inline-block; padding:10px; background:#fff; border:1px solid var(--border-color); border-radius:10px; margin-bottom:12px;"></div>
+                <p id="qr-url-text" style="font-size:11px; color:var(--text-light-color); word-break:break-all; margin:0 0 12px; padding:8px; background:var(--light-gray); border-radius:6px;"></p>
+                <button onclick="App.UI.downloadQR()" style="
+                    width:100%; padding:9px; background:var(--primary-color); color:white;
+                    border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500;
+                    display:flex; align-items:center; justify-content:center; gap:6px;">
+                    <i data-lucide="download" style="width:15px;height:15px;"></i> Tải QR Code (PNG)
+                </button>
+            </div>
+        </div>
     </div>
 
     <div id="mapTong">
@@ -537,6 +603,7 @@ document.addEventListener('DOMContentLoaded', function () {
             diemNhayCam: '<?= $diemNhayCamDetailUrlBase ?>',
             diemTrongDiem: '<?= $diemTrongDiemDetailUrlBase ?>',
         },
+        FILES_API_URL: '<?= Yii::$app->urlManager->createUrl(["/quanly/map/get-files"]) ?>',
         MAP_CENTER: [20.47206102639595, 106.318817631933],
         MAP_ZOOM: 14,
         
@@ -735,10 +802,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // --- MODULE QUẢN LÝ GIAO DIỆN (ĐÃ CẬP NHẬT) ---
         UI: {
             init() {
-                 this.fixMobileHeight();
+                this.fixMobileHeight();
                 document.getElementById('toggle-tab-btn').innerHTML = `<i data-lucide="menu"></i>`;
                 document.getElementById('back-to-map-mobile-btn').innerHTML = `<i data-lucide="x"></i>`;
                 if (window.innerWidth <= 768) this.toggleTabPanel(false);
+                this.renderQRCode();
             },
             fixMobileHeight: () => {
                 const setAppHeight = () => document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
@@ -779,43 +847,103 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 content += "</table>";
 
-                let detailUrl = '';
-                const featureId = feature.id; 
-                const numericId = featureId ? featureId.split('.').pop() : null;
+                // --- Map layer ID → detail URL key + files API layer key ---
+                const layerDetailMap = {
+                    'wmsVuviecLayer':          { urlKey: 'vuViec',         filesKey: null },
+                    'clusterVuviecLayer':      { urlKey: 'vuViec',         filesKey: null },
+                    'wmsNocgiaLayer':          { urlKey: 'nocGia',         filesKey: null },
+                    'wmsDiemnhaycamLayer':     { urlKey: 'diemNhayCam',    filesKey: null },
+                    'wmsDiemtrongdiemLayer':   { urlKey: 'diemTrongDiem',  filesKey: null },
+                };
 
-                if (numericId && !isNaN(numericId)) {
-                    // Dùng config.id (từ registry) để quyết định URL
-                    switch (config.id) {
-                        case 'wmsVuviecLayer':
-                        case 'clusterVuviecLayer':
-                            detailUrl = `${App.DETAIL_URLS.vuViec}?id=${numericId}`;
-                            break;
-                        case 'wmsNocgiaLayer':
-                            detailUrl = `${App.DETAIL_URLS.nocGia}?id=${numericId}`;
-                            break;
-                        case 'wmsDiemnhaycamLayer':
-                            detailUrl = `${App.DETAIL_URLS.diemNhayCam}?id=${numericId}`;
-                            break;
-                        case 'wmsDiemtrongdiemLayer':
-                            detailUrl = `${App.DETAIL_URLS.diemTrongDiem}?id=${numericId}`;
-                            break;
-                        // TODO: Thêm case cho các layer mới nếu chúng có trang chi tiết
-                    }
-                }
+                const featureId  = feature.id;
+                const numericId  = featureId ? featureId.split('.').pop() : null;
+                const layerCfg   = layerDetailMap[config.id] || {};
+                const detailUrl  = (numericId && !isNaN(numericId) && layerCfg.urlKey)
+                    ? `${App.DETAIL_URLS[layerCfg.urlKey]}?id=${numericId}` : '';
+                const filesKey   = layerCfg.filesKey || null;
 
+                // --- Nút Xem chi tiết ---
                 if (detailUrl) {
                     content += `
-                        <div style="margin-top: 15px; text-align: right;">
+                        <div style="margin-top:15px; text-align:right;">
                             <a href="${detailUrl}" target="_blank" class="detail-button">
                                 <i data-lucide="external-link" class="icon"></i> Xem chi tiết
                             </a>
-                        </div>
-                    `;
+                        </div>`;
                 }
 
-                content += "</div>";
+                // --- Khu vực ảnh đính kèm (placeholder, sẽ được load async) ---
+                if (filesKey && numericId && !isNaN(numericId)) {
+                    content += `<div id="attachment-section" style="margin-top:14px;">
+                        <div style="font-size:12px;color:var(--text-light-color);">
+                            <i data-lucide="loader" style="width:14px;height:14px;animation:spin 1s linear infinite;vertical-align:middle;"></i>
+                            Đang tải file đính kèm...
+                        </div>
+                    </div>`;
+                }
+
+                content += `</div>`;
                 document.getElementById('feature-details').innerHTML = content;
                 lucide.createIcons();
+
+                // --- Fetch file đính kèm async ---
+                if (filesKey && numericId && !isNaN(numericId)) {
+                    fetch(`${App.FILES_API_URL}?layer=${filesKey}&id=${numericId}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            const section = document.getElementById('attachment-section');
+                            if (!section) return;
+                            if (!data.success || data.files.length === 0) {
+                                section.innerHTML = `<p style="font-size:12px;color:var(--text-light-color);margin:0;">Không có file đính kèm.</p>`;
+                                return;
+                            }
+                            let html = `<div style="font-size:12px;font-weight:600;color:var(--text-color);margin-bottom:8px;">
+                                📎 File đính kèm (${data.files.length})
+                            </div>`;
+
+                            // Ảnh — hiển thị dạng lưới
+                            const images = data.files.filter(f => f.isImage);
+                            const others = data.files.filter(f => !f.isImage);
+
+                            if (images.length > 0) {
+                                html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;margin-bottom:8px;">`;
+                                images.forEach(f => {
+                                    html += `<a href="${f.url}" target="_blank" style="display:block;border-radius:6px;overflow:hidden;border:1px solid var(--border-color);">
+                                        <img src="${f.url}" alt="${f.name}" 
+                                             style="width:100%;height:70px;object-fit:cover;display:block;"
+                                             onerror="this.parentElement.style.display='none'">
+                                    </a>`;
+                                });
+                                html += `</div>`;
+                            }
+
+                            // File khác — danh sách link
+                            if (others.length > 0) {
+                                others.forEach(f => {
+                                    html += `<a href="${f.url}" target="_blank" 
+                                               style="display:flex;align-items:center;gap:6px;padding:6px 8px;
+                                                      border:1px solid var(--border-color);border-radius:6px;
+                                                      text-decoration:none;color:var(--text-color);font-size:12px;
+                                                      margin-bottom:5px;transition:background 0.2s;"
+                                               onmouseover="this.style.background='var(--light-gray)'"
+                                               onmouseout="this.style.background=''"
+                                            >
+                                        <i data-lucide="file" style="width:14px;height:14px;flex-shrink:0;color:var(--primary-color);"></i>
+                                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</span>
+                                        <i data-lucide="download" style="width:12px;height:12px;margin-left:auto;flex-shrink:0;color:var(--text-light-color);"></i>
+                                    </a>`;
+                                });
+                            }
+
+                            section.innerHTML = html;
+                            lucide.createIcons();
+                        })
+                        .catch(() => {
+                            const section = document.getElementById('attachment-section');
+                            if (section) section.innerHTML = `<p style="font-size:12px;color:#ef4444;margin:0;">Lỗi tải file đính kèm.</p>`;
+                        });
+                }
             },
             
             setLoading(isLoading) { 
@@ -841,7 +969,38 @@ document.addEventListener('DOMContentLoaded', function () {
             toggleLegend() { 
                 const legend = this.legendContainer;
                 legend.style.display = (legend.style.display === 'none' || legend.style.display === '') ? 'block' : 'none';
-             }
+             },
+
+            renderQRCode() {
+                const container = document.getElementById('qr-canvas');
+                const urlText = document.getElementById('qr-url-text');
+                if (!container) return;
+                const publicUrl = '<?= Yii::$app->urlManager->createAbsoluteUrl(['/quanly/map/vuviec']) ?>';
+                if (urlText) urlText.textContent = publicUrl;
+                container.innerHTML = '';
+                new QRCode(container, {
+                    text: publicUrl,
+                    width: 180,
+                    height: 180,
+                    colorDark: '#1e293b',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                lucide.createIcons();
+            },
+
+            downloadQR() {
+                const canvas = document.querySelector('#qr-canvas canvas');
+                const img = document.querySelector('#qr-canvas img');
+                let dataUrl;
+                if (canvas) dataUrl = canvas.toDataURL('image/png');
+                else if (img) dataUrl = img.src;
+                else return;
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = 'qrcode-bandodso.png';
+                a.click();
+            }
         },
         
         // --- MODULE QUẢN LÝ SỰ KIỆN (ĐÃ CẬP NHẬT onMapClick) ---
