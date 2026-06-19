@@ -9,212 +9,273 @@ use app\modules\quanly\models\CosokinhdoanhCodk;
 use app\modules\quanly\models\CosonguycoChayno;
 use app\modules\quanly\models\DiemNhayCam;
 use app\modules\quanly\models\DiemTenannxh;
+use app\modules\quanly\models\DiemTrongDiem;
 use app\modules\quanly\models\KhuvucPhuctapAnNinh;
 use app\modules\quanly\models\MuctieuTrongdiem;
-use app\modules\quanly\models\NguoiDan;
 use app\modules\quanly\models\NguonNuocCcc;
-// use app\modules\quanly\models\Phuongxa; // Không cần nữa
-use app\modules\quanly\models\TrangThaiXuLy;
 use app\modules\quanly\models\TruNuocCcc;
 use app\modules\quanly\models\VuViec;
+use app\modules\quanly\models\NocGia;
 use Yii;
-use yii\db\Expression;
-use yii\helpers\ArrayHelper;
 
 /**
- * DashboardController (Phiên bản Bảng Điều hành Nghiệp vụ v4)
- * Gỡ bỏ logic lọc theo Phường/Xã.
- * Thêm điều kiện status = 1 cho tất cả các truy vấn.
+ * DashboardController (Bảng Điều hành Nghiệp vụ ANTT v5 - Phân loại màu thông minh)
  */
 class DashboardController extends QuanlyBaseController
 {
     /**
-     * Hiển thị Bảng điều hành ANTT thông minh.
-     * @return string
-     * @throws \yii\db\Exception
+     * Phân loại chuỗi trạng thái tiếng Việt sang màu tương ứng (Đỏ, Vàng, Xanh)
+     * 
+     * @param string|null $value Giá trị chuỗi trạng thái
+     * @param string $defaultColor Màu mặc định khi giá trị rỗng/null
+     * @return string 'do' | 'vang' | 'xanh'
      */
+    private static function classifyStatus($value, $defaultColor = 'xanh')
+    {
+        if ($value === null || trim($value) === '') {
+            return $defaultColor;
+        }
+
+        $valLower = mb_strtolower(trim($value), 'UTF-8');
+
+        // 1. NHÓM ĐỎ: Các trạng thái tiêu cực nghiêm trọng, sự cố, mất kết nối, đình chỉ hoạt động
+        $redKeywords = [
+            'hỏng', 'hư hỏng', 'không hoạt động', 'offline', 'mất tín hiệu', 
+            'đình chỉ', 'đóng cửa', 'nguy cơ cao', 'rất cao', 'nghiêm trọng', 
+            'khẩn cấp', 'không đạt', 'sự cố', 'nguy hiểm', 'đỏ', 
+            'hư hại', 'cao'
+            
+        ];
+
+        // 2. NHÓM VÀNG: Trạng thái trung bình, cần theo dõi, tạm ngưng, thiếu hụt, nhắc nhở
+        $yellowKeywords = [
+            'trung bình', 'tạm ngưng', 'chờ xử lý', 'đang xử lý', 'cảnh báo', 
+            'cần sửa chữa', 'cần bảo trì', 'theo dõi', 'hạn chế',
+            'lưu động', 'yếu', 'thấp', 'nhắc nhở',
+            'thiếu', 'không ổn định'
+        ];
+
+        // 3. NHÓM XANH: Trạng thái tốt, ổn định, hoạt động bình thường, an toàn
+        $greenKeywords = [
+            'tốt', 'hoạt động tốt', 'đang hoạt động', 'hoạt động', 'online', 
+            'ổn định', 'cố định', 'đã xử lý', 'bình thường', 'đạt', 'xanh',
+            'an toàn', 'thấp'
+        ];
+
+        // Duyệt tìm từ khóa Đỏ
+        foreach ($redKeywords as $kw) {
+            if (mb_strpos($valLower, $kw, 0, 'UTF-8') !== false) {
+                return 'do';
+            }
+        }
+
+        // Duyệt tìm từ khóa Vàng
+        foreach ($yellowKeywords as $kw) {
+            if (mb_strpos($valLower, $kw, 0, 'UTF-8') !== false) {
+                return 'vang';
+            }
+        }
+
+        // Duyệt tìm từ khóa Xanh
+        foreach ($greenKeywords as $kw) {
+            if (mb_strpos($valLower, $kw, 0, 'UTF-8') !== false) {
+                return 'xanh';
+            }
+        }
+
+        // Nếu chuỗi không rỗng nhưng không khớp bất kỳ nhóm nào, mặc định phân vào Vàng (cần theo dõi)
+        return 'vang';
+    }
+
+    /**
+     * Đếm và phân loại trạng thái Đỏ/Vàng/Xanh cho một Model dựa trên cột chỉ định
+     */
+    private static function aggregateLayerStats($modelClass, $statusField, $defaultColor = 'xanh')
+    {
+        $records = $modelClass::find()->where(['status' => 1])->select([$statusField])->asArray()->all();
+        
+        $do = 0;
+        $vang = 0;
+        $xanh = 0;
+
+        foreach ($records as $r) {
+            $val = isset($r[$statusField]) ? $r[$statusField] : null;
+            $color = self::classifyStatus($val, $defaultColor);
+            if ($color === 'do') {
+                $do++;
+            } elseif ($color === 'vang') {
+                $vang++;
+            } else {
+                $xanh++;
+            }
+        }
+
+        return ['do' => $do, 'vang' => $vang, 'xanh' => $xanh];
+    }
+
     public function actionIndex()
     {
-        // --- Lấy ID trạng thái 'Đã giải quyết' ---
-        // Thêm status=1 cho TrangThaiXuLy
-        $trangThaiDaGiaiQuyet = TrangThaiXuLy::findOne(['ten_trang_thai' => 'Đã giải quyết', 'status' => 1]);
-        $idDaGiaiQuyet = $trangThaiDaGiaiQuyet ? $trangThaiDaGiaiQuyet->id : -1;
+        // 1. Mục tiêu trọng điểm
+        $mtTrongdiem = self::aggregateLayerStats(MuctieuTrongdiem::class, 'trang_thai_an_ninh', 'xanh');
 
-        // === 1. KPI TÁC NGHIỆP CHÍNH (TOÀN HỆ THỐNG - 1 PHƯỜNG) ===
-        $kpis = [
-            'vuViecHomNay' => (int) VuViec::find()
-                ->where(['status' => 1]) // Thêm status
-                ->andWhere(['>=', 'created_at', new Expression('CURRENT_DATE')])
-                ->count(),
+        // 2. Khu vực phức tạp AN
+        $kvPhuctap = self::aggregateLayerStats(KhuvucPhuctapAnNinh::class, 'muc_do_phuctap', 'xanh');
+
+        // 3. Cơ sở nguy cơ cháy nổ
+        $csChayno = self::aggregateLayerStats(CosonguycoChayno::class, 'muc_do_nguy_co', 'xanh');
+
+        // 4. Trụ nước PCCC
+        $truNuoc = self::aggregateLayerStats(TruNuocCcc::class, 'tinh_trang', 'xanh');
+
+        // 5. Nguồn nước PCCC
+        $nguonNuoc = self::aggregateLayerStats(NguonNuocCcc::class, 'tinh_trang', 'xanh');
+
+        // 6. Cơ sở kinh doanh có điều kiện
+        $csKinhdoanh = self::aggregateLayerStats(CosokinhdoanhCodk::class, 'trang_thai_hoat_dong', 'xanh');
+
+        // 7. Điểm tệ nạn xã hội (xem xét cả mức độ nguy cơ và tình trạng xử lý)
+        $diemTenanRecords = DiemTenannxh::find()->where(['status' => 1])->select(['muc_do_nguy_co', 'tinh_trang_xu_ly'])->asArray()->all();
+        $diemTenanDo = 0; $diemTenanVang = 0; $diemTenanXanh = 0;
+        foreach ($diemTenanRecords as $r) {
+            $mucDo = isset($r['muc_do_nguy_co']) ? $r['muc_do_nguy_co'] : null;
+            $tinhTrang = isset($r['tinh_trang_xu_ly']) ? $r['tinh_trang_xu_ly'] : null;
             
-            'canhBaoDoHoatDong' => (int) VuViec::find()
-                ->where(['muc_do_canh_bao' => VuViec::CANH_BAO_DO, 'status' => 1]) // Thêm status
-                ->andWhere(['!=', 'trang_thai_hien_tai_id', $idDaGiaiQuyet])
-                ->count(),
+            $c1 = self::classifyStatus($mucDo, 'xanh');
+            $c2 = self::classifyStatus($tinhTrang, 'xanh');
             
-            'sapDenHan' => (int) VuViec::find()
-                ->where(['status' => 1]) // Thêm status
-                ->andWhere(['!=', 'trang_thai_hien_tai_id', $idDaGiaiQuyet])
-                ->andWhere(['BETWEEN', 'han_xu_ly', new Expression('NOW()'), new Expression('NOW() + INTERVAL \'3 days\'')])
-                ->count(),
-            
-            'doiTuongQuanTam' => (int) NguoiDan::find()
-                ->where(['status' => 1]) // Thêm status
-                ->andWhere(['!=', 'nhom_doi_tuong', 'Thường'])
-                ->count(),
-        ];
-
-        // === 2. DANH SÁCH TÁC NGHIỆP (TRUNG TÂM CHỈ HUY) ===
-        $topCanhBaoDo = VuViec::find()
-            ->where(['muc_do_canh_bao' => VuViec::CANH_BAO_DO, 'status' => 1]) // Thêm status
-            ->andWhere(['!=', 'trang_thai_hien_tai_id', $idDaGiaiQuyet])
-            ->orderBy(['created_at' => SORT_DESC])
-            ->limit(5)->with('linhVuc', 'nguoiDan')
-            ->all();
-
-        $topQuaHan = VuViec::find()
-            ->where(['status' => 1]) // Thêm status
-            ->andWhere(['<', 'han_xu_ly', date('Y-m-d H:i:s')])
-            ->andWhere(['!=', 'trang_thai_hien_tai_id', $idDaGiaiQuyet])
-            ->orderBy(['han_xu_ly' => SORT_ASC])
-            ->limit(5)->with('trangThaiHienTai', 'canBoTiepNhan')
-            ->all();
-
-        // === 3. DỮ LIỆU 6 LỚP CHUYÊN ĐỀ ===
-        
-        $layerData = [
-            // Lớp An ninh
-            'anNinh' => [
-                'counts' => [
-                    'Mục tiêu trọng điểm' => (int) MuctieuTrongdiem::find()->where(['status' => 1])->count(),
-                    'Khu vực phức tạp' => (int) KhuvucPhuctapAnNinh::find()->where(['status' => 1])->count(),
-                ],
-                'list' => KhuvucPhuctapAnNinh::find()
-                    ->where(['status' => 1]) // Thêm status
-                    ->orderBy(['updated_at' => SORT_DESC])
-                    ->limit(3)->all(),
-                'list_key' => 'ten', // Thuộc tính để hiển thị tên
-                'list_badge' => 'muc_do_phuctap' // Thuộc tính để hiển thị badge
-            ],
-            
-            // Lớp Trật tự Xã hội
-            'tratTuXaHoi' => [
-                'counts' => [
-                    'Điểm tệ nạn' => (int) DiemTenannxh::find()->where(['status' => 1])->count(),
-                    'Cơ sở KD có ĐK' => (int) CosokinhdoanhCodk::find()->where(['status' => 1])->count(),
-                ],
-                'list' => CosokinhdoanhCodk::find()
-                    ->where(['status' => 1]) // Thêm status
-                    ->andWhere(['IN', 'loai_hinh_kinh_doanh', ['Karaoke', 'Bar', 'Khách sạn', 'Nhà nghỉ', 'Cầm đồ']])
-                    ->orderBy(['updated_at' => SORT_DESC])
-                    ->limit(3)->all(),
-                'list_key' => 'ten_co_so',
-                'list_badge' => 'loai_hinh_kinh_doanh'
-            ],
-
-            // Lớp Quản lý Dân cư
-            'quanLyDanCu' => [
-                'counts' => [
-                    'Tổng nhân khẩu' => (int) NguoiDan::find()->where(['status' => 1])->count(),
-                    'Đối tượng quan tâm' => $kpis['doiTuongQuanTam'], // Đã có status từ $kpis
-                ],
-                'list' => NguoiDan::find()
-                    ->where(['status' => 1]) // Thêm status
-                    ->andWhere(['!=', 'nhom_doi_tuong', 'Thường'])
-                    ->orderBy(['updated_at' => SORT_DESC])
-                    ->limit(3)->all(),
-                'list_key' => 'ho_ten',
-                'list_badge' => 'nhom_doi_tuong'
-            ],
-            
-            // Lớp Tuần tra - Giám sát
-            'tuanTraGiamSat' => [
-                'counts' => [
-                    'Camera An ninh' => (int) CameraAnNinh::find()->where(['status' => 1])->count(),
-                    'Chốt tuần tra' => (int) ChotTuantre::find()->where(['status' => 1])->count(),
-                ],
-                'list' => CameraAnNinh::find() // Lấy camera đang offline
-                    ->where(['trang_thai' => 'Offline', 'status' => 1]) // Thêm status
-                    ->orderBy(['updated_at' => SORT_DESC])
-                    ->limit(3)->all(),
-                'list_key' => 'ten_diem',
-                'list_badge' => 'trang_thai'
-            ],
-            
-            // Lớp Vụ việc
-            'vuViec' => [
-                'counts' => [
-                    'Vụ việc đang xử lý' => (int) VuViec::find()
-                        ->where(['status' => 1]) // Thêm status
-                        ->andWhere(['!=', 'trang_thai_hien_tai_id', $idDaGiaiQuyet])
-                        ->count(),
-                    'Điểm nhạy cảm' => (int) DiemNhayCam::find()->where(['status' => 1])->count(),
-                ],
-                'list' => VuViec::find() // Lấy vụ việc mới nhất
-                    ->where(['status' => 1]) // Thêm status
-                    ->orderBy(['created_at' => SORT_DESC])
-                    ->limit(3)->with('linhVuc')
-                    ->all(),
-                'list_key' => 'tom_tat_noi_dung',
-                'list_badge' => 'linhVuc.ten_linh_vuc'
-            ],
-
-            // Lớp PCCC
-            'pccc' => [
-                'counts' => [
-                    'Cơ sở nguy cơ cháy' => (int) CosonguycoChayno::find()->where(['status' => 1])->count(),
-                    'Nguồn nước CCC' => (int) NguonNuocCcc::find()->where(['status' => 1])->count(),
-                    'Trụ nước CCC' => (int) TruNuocCcc::find()->where(['status' => 1])->count(),
-                ],
-                'list' => CosonguycoChayno::find() // Lấy cơ sở nguy cơ cao
-                    ->where(['status' => 1]) // Thêm status
-                    ->andWhere(['IN', 'muc_do_nguy_co', ['Cao', 'Rất Cao']])
-                    ->orderBy(['updated_at' => SORT_DESC])
-                    ->limit(3)->all(),
-                'list_key' => 'ten_co_so',
-                'list_badge' => 'muc_do_nguy_co'
-            ],
-        ];
-
-        // === 4. DỮ LIỆU BIỂU ĐỒ ===
-        // Biểu đồ đường: Xu hướng vụ việc
-        $trendData = VuViec::find()
-            ->select(['ngay' => new Expression('DATE(created_at)'), 'count' => 'COUNT(*)'])
-            ->where(['status' => 1]) // Thêm status
-            ->andWhere(['>=', 'created_at', new Expression('NOW() - INTERVAL \'30 days\'')])
-            ->groupBy(['ngay'])->orderBy('ngay ASC')
-            ->asArray()->all();
-        $trendChartLabels = [];
-        $trendChartValues = [];
-        $trendDataMap = ArrayHelper::map($trendData, 'ngay', 'count');
-        for ($i = 29; $i >= 0; $i--) {
-            $date = date('Y-m-d', strtotime("-$i days"));
-            $trendChartLabels[] = date('d/m', strtotime($date));
-            $trendChartValues[] = isset($trendDataMap[$date]) ? (int)$trendDataMap[$date] : 0;
+            if ($c1 === 'do' || $c2 === 'do') {
+                $diemTenanDo++;
+            } elseif ($c1 === 'vang' || $c2 === 'vang') {
+                $diemTenanVang++;
+            } else {
+                $diemTenanXanh++;
+            }
         }
-        $trendChartData = ['labels' => $trendChartLabels, 'data' => $trendChartValues];
+        $diemTenan = ['do' => $diemTenanDo, 'vang' => $diemTenanVang, 'xanh' => $diemTenanXanh];
 
-        // Biểu đồ tròn: Trạng thái xử lý
-        $dataByStatus = VuViec::find()
-            ->select(['trang_thai_hien_tai_id', 'count' => 'COUNT(*)'])
-            ->where(['status' => 1]) // Thêm status
-            ->groupBy('trang_thai_hien_tai_id')->with('trangThaiHienTai')
-            ->asArray()->all();
-        $statusChartData = [
-            'labels' => ArrayHelper::getColumn($dataByStatus, fn($item) => $item['trangThaiHienTai']['ten_trang_thai'] ?? 'N/A'),
-            'data' => array_map('intval', ArrayHelper::getColumn($dataByStatus, 'count')),
+        // 8. Camera an ninh
+        $camera = self::aggregateLayerStats(CameraAnNinh::class, 'trang_thai', 'xanh');
+
+        // 9. Chốt tuần tra
+        $chotTuantra = self::aggregateLayerStats(ChotTuantre::class, 'loai_chot', 'xanh');
+
+        // 10. Vụ việc
+        $vuViec = self::aggregateLayerStats(VuViec::class, 'muc_do_canh_bao', 'xanh');
+
+        // 11. Điểm nhạy cảm (Tất cả mặc định cảnh báo Vàng)
+        $nhayCamCount = (int) DiemNhayCam::find()->where(['status' => 1])->count();
+        $nhayCam = ['do' => 0, 'vang' => $nhayCamCount, 'xanh' => 0];
+
+        // 12. Điểm trọng điểm (Chứa chữ 'ma túy'/'ma tuy' -> Đỏ, còn lại Vàng)
+        $trongDiemRecords = DiemTrongDiem::find()->where(['status' => 1])->select(['tenloaihinh'])->asArray()->all();
+        $trongDiemDo = 0; $trongDiemVang = 0; $trongDiemXanh = 0;
+        foreach ($trongDiemRecords as $r) {
+            $val = isset($r['tenloaihinh']) ? $r['tenloaihinh'] : '';
+            $valLower = mb_strtolower($val, 'UTF-8');
+            if (mb_strpos($valLower, 'ma túy') !== false || mb_strpos($valLower, 'ma tuy') !== false) {
+                $trongDiemDo++;
+            } else {
+                $trongDiemVang++;
+            }
+        }
+        $trongDiem = ['do' => $trongDiemDo, 'vang' => $trongDiemVang, 'xanh' => $trongDiemXanh];
+
+        // 13. Nóc gia (Tất cả mặc định Xanh)
+        $nocGiaCount = (int) NocGia::find()->where(['status' => 1])->count();
+        $nocGia = ['do' => 0, 'vang' => 0, 'xanh' => $nocGiaCount];
+
+        // --- TỔNG HỢP DỮ LIỆU BIỂU ĐỒ ---
+        $chartData = [
+            'labels' => [
+                'Mục tiêu trọng điểm', 'Khu vực phức tạp AN', 'Cơ sở cháy nổ', 'Trụ nước PCCC', 'Nguồn nước PCCC',
+                'Cơ sở KD có ĐK', 'Điểm tệ nạn XH', 'Camera an ninh', 'Chốt tuần tra', 'Vụ việc',
+                'Điểm nhạy cảm', 'Điểm trọng điểm', 'Nóc gia'
+            ],
+            'do' => [
+                $mtTrongdiem['do'], $kvPhuctap['do'], $csChayno['do'], $truNuoc['do'], $nguonNuoc['do'],
+                $csKinhdoanh['do'], $diemTenan['do'], $camera['do'], $chotTuantra['do'], $vuViec['do'],
+                $nhayCam['do'], $trongDiem['do'], $nocGia['do']
+            ],
+            'vang' => [
+                $mtTrongdiem['vang'], $kvPhuctap['vang'], $csChayno['vang'], $truNuoc['vang'], $nguonNuoc['vang'],
+                $csKinhdoanh['vang'], $diemTenan['vang'], $camera['vang'], $chotTuantra['vang'], $vuViec['vang'],
+                $nhayCam['vang'], $trongDiem['vang'], $nocGia['vang']
+            ],
+            'xanh' => [
+                $mtTrongdiem['xanh'], $kvPhuctap['xanh'], $csChayno['xanh'], $truNuoc['xanh'], $nguonNuoc['xanh'],
+                $csKinhdoanh['xanh'], $diemTenan['xanh'], $camera['xanh'], $chotTuantra['xanh'], $vuViec['xanh'],
+                $nhayCam['xanh'], $trongDiem['xanh'], $nocGia['xanh']
+            ],
         ];
 
-        // === RENDER VIEW ===
+        $summaryChartData = [
+            'labels' => ['Đỏ (Nguy cơ / Sự cố / Đình chỉ)', 'Vàng (Trung bình / Cảnh báo)', 'Xanh (Ổn định / Đang hoạt động)'],
+            'data' => [
+                array_sum($chartData['do']),
+                array_sum($chartData['vang']),
+                array_sum($chartData['xanh']),
+            ],
+        ];
+
+        $layerData = [
+            'muctieu_trongdiem' => [
+                'title' => 'Mục tiêu trọng điểm',
+                'chart' => $mtTrongdiem,
+            ],
+            'khuvuc_phuctap_an_ninh' => [
+                'title' => 'Khu vực phức tạp AN',
+                'chart' => $kvPhuctap,
+            ],
+            'cosonguyco_chayno' => [
+                'title' => 'Cơ sở nguy cơ cháy nổ',
+                'chart' => $csChayno,
+            ],
+            'tru_nuoc_ccc' => [
+                'title' => 'Trụ nước PCCC',
+                'chart' => $truNuoc,
+            ],
+            'nguon_nuoc_ccc' => [
+                'title' => 'Nguồn nước PCCC',
+                'chart' => $nguonNuoc,
+            ],
+            'cosokinhdoanh_codk' => [
+                'title' => 'Cơ sở KD có ĐK',
+                'chart' => $csKinhdoanh,
+            ],
+            'diem_tenannxh' => [
+                'title' => 'Điểm tệ nạn xã hội',
+                'chart' => $diemTenan,
+            ],
+            'camera_an_ninh' => [
+                'title' => 'Camera an ninh',
+                'chart' => $camera,
+            ],
+            'chot_tuantre' => [
+                'title' => 'Chốt tuần tra',
+                'chart' => $chotTuantra,
+            ],
+            'vu_viec' => [
+                'title' => 'Vụ việc',
+                'chart' => $vuViec,
+            ],
+            'diem_nhay_cam' => [
+                'title' => 'Điểm nhạy cảm',
+                'chart' => $nhayCam,
+            ],
+            'diem_trong_diem' => [
+                'title' => 'Điểm trọng điểm',
+                'chart' => $trongDiem,
+            ],
+            'noc_gia' => [
+                'title' => 'Nóc gia',
+                'chart' => $nocGia,
+            ],
+        ];
+
         return $this->render('index', [
-            // 'tenPhuongXa' => $tenPhuongXa, // Đã bỏ
-            'kpis' => $kpis,
-            'topCanhBaoDo' => $topCanhBaoDo,
-            'topQuaHan' => $topQuaHan,
+            'chartData' => $chartData,
+            'summaryChartData' => $summaryChartData,
             'layerData' => $layerData,
-            'trendChartData' => $trendChartData,
-            'statusChartData' => $statusChartData,
         ]);
     }
 }
-

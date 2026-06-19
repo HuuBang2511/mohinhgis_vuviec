@@ -1,493 +1,934 @@
 <?php
 /**
- * BẢNG ĐIỀU HÀNH NGHIỆP VỤ ANTT (CHO CÔNG AN PHƯỜNG) - v3
- * Thiết kế theo 6 lớp chuyên đề, bỏ bản đồ, bỏ lọc phường.
+ * BẢNG ĐIỀU HÀNH NGHIỆP VỤ ANTT — Phiên bản thiết kế lại (13 Lớp riêng biệt)
  *
  * @var yii\web\View $this
- * @var array $kpis
- * @var array $topCanhBaoDo
- * @var array $topQuaHan
- * @var array $layerData (Dữ liệu 6 lớp chuyên đề)
- * @var array $trendChartData
- * @var array $statusChartData
+ * @var array $summaryChartData
+ * @var array $chartData
+ * @var array $layerData
  */
 
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
-use yii\helpers\ArrayHelper;
 
-$this->title = 'Bảng điều hành nghiệp vụ ANTT'; // Đã bỏ tên phường
+$this->title = 'BẢNG ĐIỀU HÀNH NGHIỆP VỤ ANTT';
 $this->params['breadcrumbs'][] = $this->title;
 
-// Mã hóa dữ liệu để truyền cho JavaScript
-$trendChartDataJson = Json::encode($trendChartData);
-$statusChartDataJson = Json::encode($statusChartData);
-
-// URL Bản đồ
-$mapUrl = Url::to(['/quanly/map/vuviec']);
-
-// Helper function để hiển thị badge cho 6 lớp
-function get_badge_class($layerName, $badgeText) {
-    $base = "badge text-xs font-semibold px-2 py-0.5 rounded-full ";
-    switch ($layerName) {
-        case 'anNinh':
-            return $base . ($badgeText == 'Cao' ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800');
-        case 'tratTuXaHoi':
-            return $base . 'bg-orange-100 text-orange-800';
-        case 'quanLyDanCu':
-            return $base . 'bg-indigo-100 text-indigo-800';
-        case 'tuanTraGiamSat':
-            return $base . ($badgeText == 'Offline' ? 'bg-gray-200 text-gray-800' : 'bg-blue-100 text-blue-800');
-        case 'vuViec':
-            return $base . 'bg-blue-100 text-blue-800';
-        case 'pccc':
-            return $base . (str_contains((string)$badgeText, 'Cao') ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800');
-        default:
-            return $base . 'bg-gray-100 text-gray-800';
-    }
-}
+$summaryChartDataJson = Json::encode($summaryChartData);
+$chartDataJson        = Json::encode($chartData);
+$layerDataJson        = Json::encode($layerData);
+$mapUrl               = Url::to(['/quanly/map/vuviec']);
 ?>
 
-<!-- Include CSS & JS for libraries -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
+<!-- ===== EXTERNAL RESOURCES ===== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
+<!-- ===== CORE STYLES ===== -->
 <style>
-    body {
-        background-color: #f1f5f9; /* slate-100 */
-    }
-    .card {
-        background-color: white;
-        border-radius: 0.75rem; /* rounded-xl */
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.02);
-        border: 1px solid #e2e8f0; /* slate-200 */
-    }
-    .card-title {
-        font-size: 1.125rem; /* text-lg */
-        font-weight: 600; /* font-semibold */
-        color: #1e293b; /* slate-800 */
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid #e2e8f0; /* slate-200 */
-        display: flex;
-        align-items: center;
-    }
-    .card-title i {
-        width: 1.25rem;
-        height: 1.25rem;
-        margin-right: 0.75rem;
-    }
-    .card-content {
-        padding: 1rem 1.5rem;
-    }
-    .kpi-card {
-        display: flex;
-        align-items: center;
-        padding: 1.25rem; /* p-5 */
-    }
-    .kpi-icon {
-        padding: 0.875rem; /* p-3.5 */
-        border-radius: 9999px; /* rounded-full */
-        margin-right: 1.25rem; /* mr-5 */
-    }
-    .kpi-icon i {
-        width: 1.75rem; /* w-7 */
-        height: 1.75rem; /* h-7 */
-    }
-    .kpi-value {
-        font-size: 2rem; /* text-3xl */
-        font-weight: 700; /* font-bold */
-        color: #1e293b; /* slate-800 */
-    }
-    .kpi-label {
-        font-size: 0.875rem; /* text-sm */
-        color: #64748b; /* slate-500 */
-    }
-    .list-item {
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #e2e8f0; /* slate-200 */
-    }
-    .list-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .list-item:first-child { padding-top: 0; }
-    
-    .badge {
-        display: inline-block;
-        font-size: 0.75rem; /* text-xs */
-        font-weight: 500; /* font-medium */
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-    }
-    .layer-card-title {
-        font-size: 1rem; /* text-base */
-        font-weight: 600;
-        color: #334155; /* slate-700 */
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    .layer-card-title i {
-        width: 1.125rem; /* w-4.5 */
-        height: 1.125rem; /* h-4.5 */
-        margin-right: 0.5rem;
-    }
-    .layer-kpi-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem 1rem;
-        margin-bottom: 1rem;
-    }
-    .layer-kpi-item {
-        display: flex;
-        align-items: baseline;
-    }
-    .layer-kpi-value {
-        font-size: 1.25rem; /* text-xl */
-        font-weight: 600;
-        color: #1e293b; /* slate-800 */
-        margin-right: 0.25rem;
-    }
-    .layer-kpi-label {
-        font-size: 0.875rem; /* text-sm */
-        color: #64748b; /* slate-500 */
-    }
-    .layer-sublist-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 0;
-        border-top: 1px solid #f1f5f9; /* slate-100 */
-    }
-    .layer-sublist-item:first-child { border-top: none; padding-top: 0; }
+/* ── Reset & tokens ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg-base:     #0b0f1a;
+    --bg-panel:    #111827;
+    --bg-card:     #161d2e;
+    --bg-hover:    #1e2a3d;
+    --border:      rgba(255,255,255,.07);
+    --border-hi:   rgba(255,255,255,.15);
+
+    --txt-primary: #f0f4ff;
+    --txt-muted:   #8896b3;
+    --txt-dim:     #4a5568;
+
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-red:  #ef4444;
+    --accent-amber:#f59e0b;
+    --accent-green:#22c55e;
+    --accent-purple:#a855f7;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+
+    --font-ui: 'Be Vietnam Pro', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --shadow-card: 0 4px 24px rgba(0,0,0,.4);
+    --glow-blue:   0 0 20px rgba(59,130,246,.2);
+}
+
+/* ── Base layout ───────────────────────────────────────────── */
+.ud-dash {
+    font-family: var(--font-ui);
+    background: var(--bg-base);
+    color: var(--txt-primary);
+    min-height: 100vh;
+    padding: 0 0 64px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.ud-dash::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 80% 40% at 10% 0%, rgba(59,130,246,.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 30% at 90% 100%, rgba(6,182,212,.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.ud-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,15,26,.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.ud-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ud-header-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.ud-header-title {
+    font-size: clamp(13px, 2vw, 16px);
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--txt-primary);
+    line-height: 1.2;
+}
+
+.ud-header-sub {
+    font-size: 11px;
+    color: var(--txt-muted);
+    font-weight: 400;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.ud-header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn-map {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+    box-shadow: 0 4px 12px rgba(59,130,246,.35);
+}
+.btn-map:hover { opacity: .88; transform: translateY(-1px); }
+
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(34,197,94,.1);
+    border: 1px solid rgba(34,197,94,.25);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-green);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.live-dot {
+    width: 7px; height: 7px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .4; transform: scale(.7); }
+}
+
+/* ── Main content ──────────────────────────────────────────── */
+.ud-body {
+    position: relative;
+    z-index: 1;
+    padding: 24px 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* ── Section title ─────────────────────────────────────────── */
+.ud-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--txt-muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ud-section-title::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: var(--accent-blue);
+    border-radius: 3px;
+    display: inline-block;
+}
+
+/* ── KPI strip ─────────────────────────────────────────────── */
+.ud-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 14px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s, transform .2s;
+    cursor: default;
+}
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--kpi-color, var(--accent-blue));
+}
+.kpi-card:hover {
+    border-color: var(--border-hi);
+    transform: translateY(-2px);
+}
+
+.kpi-icon {
+    font-size: 20px;
+    margin-bottom: 8px;
+    display: block;
+}
+.kpi-value {
+    font-size: 24px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--kpi-color, var(--txt-primary));
+    line-height: 1;
+    margin-bottom: 4px;
+}
+.kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--txt-muted);
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.kpi-sub {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--txt-dim);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+.kpi-pill {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(239,68,68,.15);
+    color: var(--accent-red);
+}
+.kpi-pill.green {
+    background: rgba(34,197,94,.15);
+    color: var(--accent-green);
+}
+.kpi-pill.amber {
+    background: rgba(245,158,11,.15);
+    color: var(--accent-amber);
+}
+
+/* ── Grid layouts ──────────────────────────────────────────── */
+.ud-grid-2 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+}
+
+/* ── Card base ─────────────────────────────────────────────── */
+.ud-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-card);
+}
+
+.ud-card-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.ud-card-head-icon {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.ud-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--txt-muted);
+    flex: 1;
+}
+.ud-card-body {
+    padding: 18px;
+    flex: 1;
+    position: relative;
+}
+
+/* ── Chart containers ──────────────────────────────────────── */
+.chart-wrap {
+    position: relative;
+    width: 100%; height: 380px;
+}
+.chart-wrap-sm {
+    position: relative;
+    width: 100%; height: 280px;
+}
+.donut-wrap {
+    position: relative;
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+}
+.donut-center {
+    position: absolute;
+    text-align: center;
+    pointer-events: none;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+}
+.donut-total {
+    font-size: 26px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--txt-primary);
+}
+.donut-lbl {
+    font-size: 10px;
+    color: var(--txt-muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+/* ── Bar legends ───────────────────────────────────────────── */
+.bar-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 18px 14px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+.bar-legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--txt-muted);
+}
+.legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+}
+
+/* ── Layer section separator ───────────────────────────────── */
+.layer-sep {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 32px 0 16px;
+}
+.layer-sep-num {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--layer-bg, rgba(59,130,246,.15));
+    border: 1px solid var(--layer-border, rgba(59,130,246,.3));
+    color: var(--layer-color, var(--accent-blue));
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.layer-sep-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--txt-primary);
+    letter-spacing: .02em;
+}
+.layer-sep-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+.layer-sep-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--txt-muted);
+    background: var(--bg-hover);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+}
+
+/* ── Layer detail grid ─────────────────────────────────────── */
+.layer-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* ── Evaluation bars ───────────────────────────────────────── */
+.eval-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 0;
+}
+.eval-row {
+    display: grid;
+    grid-template-columns: 70px 1fr 42px;
+    align-items: center;
+    gap: 10px;
+}
+.eval-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.eval-bar-track {
+    background: rgba(255,255,255,.06);
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+}
+.eval-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(.19,1,.22,1);
+}
+.eval-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+}
+
+/* ── Stat mini grid ────────────────────────────────────────── */
+.stat-mini-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.stat-mini-cell {
+    background: var(--bg-hover);
+    padding: 14px 12px;
+    text-align: center;
+}
+.stat-mini-val {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+.stat-mini-lbl {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--txt-muted);
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 1400px) {
+    .ud-grid-2        { grid-template-columns: 1fr 1fr; }
+    .layer-detail-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 900px) {
+    .ud-grid-2       { grid-template-columns: 1fr; }
+    .layer-detail-grid { grid-template-columns: 1fr; }
+    .ud-body         { padding: 16px 12px; }
+    .chart-wrap      { height: 320px; }
+    .chart-wrap-sm   { height: 220px; }
+}
+
+@media (max-width: 560px) {
+    .kpi-value       { font-size: 22px; }
+    .ud-header       { padding: 10px 14px; }
+}
+
+/* ── Fade-in animation ─────────────────────────────────────── */
+.ud-anim {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: fadeUp .45s cubic-bezier(.19,1,.22,1) forwards;
+}
+@keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+.ud-anim:nth-child(1)  { animation-delay: .03s; }
+.ud-anim:nth-child(2)  { animation-delay: .06s; }
+.ud-anim:nth-child(3)  { animation-delay: .09s; }
+.ud-anim:nth-child(4)  { animation-delay: .12s; }
+.ud-anim:nth-child(5)  { animation-delay: .15s; }
+.ud-anim:nth-child(6)  { animation-delay: .18s; }
 </style>
 
-<div class="quanly-dashboard p-4 sm:p-6 lg:p-8 space-y-6">
-    
-    <!-- === Header === -->
-    <div class="flex flex-wrap justify-between items-center gap-4 mb-2">
-        <div>
-            <h1 class="text-3xl font-bold text-slate-800"><?= Html::encode($this->title) ?></h1>
-            <p class="text-slate-500 mt-1">Bảng điều hành nghiệp vụ ANTT Phường Thái Bình, Tỉnh Hưng Yên.</p>
+<!-- ===== MARKUP ===== -->
+<div class="ud-dash">
+
+    <!-- ── HEADER ─────────────────────────────────────── -->
+    <header class="ud-header">
+        <div class="ud-header-brand">
+            <div class="ud-header-icon">🛡️</div>
+            <div>
+                <div class="ud-header-title">Bảng Điều Hành Nghiệp Vụ ANTT</div>
+                <div class="ud-header-sub">Chi tiết 13 lớp dữ liệu chuyên đề 2026</div>
+            </div>
         </div>
-        <div class="flex gap-3 items-center">
-            <!-- Đã gỡ bỏ ô "Địa bàn" -->
-            <!-- Nút bấm chuyển sang bản đồ -->
-            <a href="<?= Html::encode($mapUrl) ?>" target="_blank" class="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow-sm transition-colors">
-                <i data-lucide="map" class="w-4 h-4 mr-2"></i>
-                Chuyển Tới Bản Đồ
+        <div class="ud-header-actions">
+            <div class="live-badge">
+                <span class="live-dot"></span> Trực tuyến
+            </div>
+            <a href="<?= Html::encode($mapUrl) ?>" target="_blank" class="btn-map">
+                🗺️ Xem Bản Đồ
             </a>
         </div>
-    </div>
+    </header>
 
-    <!-- === Hàng 1: KPIs Tác Nghiệp Chính === -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="card kpi-card">
-            <div class="kpi-icon bg-blue-100 text-blue-600"><i data-lucide="alert-circle"></i></div>
-            <div>
-                <div class="kpi-value"><?= $kpis['vuViecHomNay'] ?></div>
-                <div class="kpi-label">Vụ việc mới trong ngày</div>
-            </div>
-        </div>
-        <div class="card kpi-card">
-            <div class="kpi-icon bg-red-100 text-red-600"><i data-lucide="shield-alert"></i></div>
-            <div>
-                <div class="kpi-value"><?= $kpis['canhBaoDoHoatDong'] ?></div>
-                <div class="kpi-label">Cảnh báo Đỏ đang hoạt động</div>
-            </div>
-        </div>
-        <div class="card kpi-card">
-            <div class="kpi-icon bg-yellow-100 text-yellow-600"><i data-lucide="calendar-clock"></i></div>
-            <div>
-                <div class="kpi-value"><?= $kpis['sapDenHan'] ?></div>
-                <div class="kpi-label">Vụ việc sắp đến hạn (3 ngày)</div>
-            </div>
-        </div>
-        <div class="card kpi-card">
-            <div class="kpi-icon bg-indigo-100 text-indigo-600"><i data-lucide="users"></i></div>
-            <div>
-                <div class="kpi-value"><?= $kpis['doiTuongQuanTam'] ?></div>
-                <div class="kpi-label">Đối tượng cần quan tâm</div>
-            </div>
-        </div>
-    </div>
+    <!-- ── BODY ───────────────────────────────────────── -->
+    <main class="ud-body">
 
-    <!-- === Hàng 2: Trung tâm Tác nghiệp (Cảnh báo & Quá hạn) === -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Vụ việc Cảnh báo Đỏ -->
-        <div class="card">
-            <h2 class="card-title text-red-600">
-                <i data-lucide="alert-triangle"></i>
-                Trung tâm Cảnh báo Đỏ
-            </h2>
-            <div class="card-content pt-0">
-                <?php if (empty($topCanhBaoDo)): ?>
-                    <p class="text-center text-slate-500 py-4">Không có cảnh báo đỏ nào đang hoạt động.</p>
-                <?php else: foreach ($topCanhBaoDo as $vuviec): ?>
-                    <div class="list-item">
-                        <p class="font-semibold text-slate-700 truncate"><?= Html::encode($vuviec->tom_tat_noi_dung) ?></p>
-                        <div class="flex justify-between text-sm mt-1">
-                            <span class="text-slate-500">Lĩnh vực: <span class="font-medium text-slate-600"><?= Html::encode($vuviec->linhVuc->ten_linh_vuc ?? 'N/A') ?></span></span>
-                            <span class="text-slate-500">Người báo: <span class="font-medium text-slate-600"><?= Html::encode($vuviec->nguoiDan->ho_ten ?? 'N/A') ?></span></span>
+        <!-- ① KPI STRIP (13 items) -->
+        <div class="ud-section-title">Tổng quan 13 lớp chuyên đề</div>
+        <div class="ud-kpi-strip" id="kpiStrip">
+            <?php
+            $kpiDefs = [
+                ['icon'=>'🛡️','label'=>'MT Trọng Điểm','color'=>'#3b82f6','key'=>'muctieu_trongdiem'],
+                ['icon'=>'🛡️','label'=>'KV Phức Tạp AN','color'=>'#2563eb','key'=>'khuvuc_phuctap_an_ninh'],
+                ['icon'=>'🔥','label'=>'Nguy Cơ Cháy Nổ','color'=>'#ef4444','key'=>'cosonguyco_chayno'],
+                ['icon'=>'🚰','label'=>'Trụ Nước PCCC','color'=>'#dc2626','key'=>'tru_nuoc_ccc'],
+                ['icon'=>'💧','label'=>'Nguồn Nước PCCC','color'=>'#b91c1c','key'=>'nguon_nuoc_ccc'],
+                ['icon'=>'🏢','label'=>'Cơ Sở KD Có ĐK','color'=>'#a855f7','key'=>'cosokinhdoanh_codk'],
+                ['icon'=>'⚠️','label'=>'Điểm Tệ Nạn XH','color'=>'#8b5cf6','key'=>'diem_tenannxh'],
+                ['icon'=>'📹','label'=>'Camera An Ninh','color'=>'#06b6d4','key'=>'camera_an_ninh'],
+                ['icon'=>'👮','label'=>'Chốt Tuần Tra','color'=>'#0891b2','key'=>'chot_tuantre'],
+                ['icon'=>'⚖️','label'=>'Vụ Việc ANTT','color'=>'#14b8a6','key'=>'vu_viec'],
+                ['icon'=>'🚨','label'=>'Điểm Nhạy Cảm','color'=>'#0d9488','key'=>'diem_nhay_cam'],
+                ['icon'=>'📍','label'=>'Điểm Trọng Điểm','color'=>'#0f766e','key'=>'diem_trong_diem'],
+                ['icon'=>'🏠','label'=>'Nóc Gia','color'=>'#f97316','key'=>'noc_gia'],
+            ];
+            foreach ($kpiDefs as $k):
+                $layer = $layerData[$k['key']];
+                $do    = $layer['chart']['do'];
+                $vang  = $layer['chart']['vang'];
+                $xanh  = $layer['chart']['xanh'];
+                $total = $do + $vang + $xanh;
+            ?>
+            <div class="kpi-card ud-anim" style="--kpi-color:<?= $k['color'] ?>" title="<?= Html::encode($k['label']) ?>">
+                <span class="kpi-icon"><?= $k['icon'] ?></span>
+                <div class="kpi-value"><?= $total ?></div>
+                <div class="kpi-label"><?= Html::encode($k['label']) ?></div>
+                <div class="kpi-sub">
+                    <?php if ($do > 0): ?><span class="kpi-pill">🔴 <?= $do ?></span><?php endif; ?>
+                    <?php if ($vang > 0): ?><span class="kpi-pill amber">🟡 <?= $vang ?></span><?php endif; ?>
+                    <?php if ($xanh > 0): ?><span class="kpi-pill green">🟢 <?= $xanh ?></span><?php endif; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- ② MAIN OVERVIEW CHARTS -->
+        <div class="ud-section-title" style="margin-top:28px">Biểu đồ tổng hợp</div>
+        <div class="ud-grid-2">
+            <!-- Bar chart -->
+            <div class="ud-card ud-anim">
+                <div class="ud-card-head">
+                    <div class="ud-card-head-icon" style="background:rgba(59,130,246,.15);">📊</div>
+                    <span class="ud-card-title">Phân loại đánh giá theo lớp</span>
+                </div>
+                <div class="ud-card-body">
+                    <div class="chart-wrap">
+                        <canvas id="mainBarChart"></canvas>
+                    </div>
+                </div>
+                <div class="bar-legend">
+                    <span class="bar-legend-item"><span class="legend-dot" style="background:#ef4444"></span>Đỏ (Nguy cơ / Sự cố / Đình chỉ)</span>
+                    <span class="bar-legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Vàng (Cảnh báo / Theo dõi)</span>
+                    <span class="bar-legend-item"><span class="legend-dot" style="background:#22c55e"></span>Xanh (Ổn định / Hoạt động tốt)</span>
+                </div>
+            </div>
+
+            <!-- Donut chart tổng hợp đỏ/vàng/xanh -->
+            <div class="ud-card ud-anim">
+                <div class="ud-card-head">
+                    <div class="ud-card-head-icon" style="background:rgba(34,197,94,.12);">📊</div>
+                    <span class="ud-card-title">Tổng hợp mức độ đánh giá</span>
+                </div>
+                <div class="ud-card-body">
+                    <div class="chart-wrap">
+                        <div class="donut-wrap">
+                            <canvas id="mainDonutChart"></canvas>
+                            <div class="donut-center">
+                                <div class="donut-total" id="mainDonutTotal">—</div>
+                                <div class="donut-lbl">Tổng bản ghi</div>
+                            </div>
                         </div>
                     </div>
-                <?php endforeach; endif; ?>
+                </div>
             </div>
         </div>
-        
-        <!-- Vụ việc Quá hạn Xử lý -->
-        <div class="card">
-            <h2 class="card-title text-yellow-600">
-                <i data-lucide="timer-off"></i>
-                Vụ việc Quá hạn Xử lý
-            </h2>
-             <div class="card-content pt-0">
-                <?php if (empty($topQuaHan)): ?>
-                    <p class="text-center text-slate-500 py-4">Không có vụ việc nào quá hạn.</p>
-                <?php else: foreach ($topQuaHan as $vuviec): ?>
-                    <div class="list-item">
-                        <p class="font-semibold text-slate-700 truncate"><?= Html::encode($vuviec->tom_tat_noi_dung) ?></p>
-                        <div class="flex justify-between text-sm mt-1">
-                            <span class="text-slate-500">Hạn xử lý: <span class="font-medium text-red-600"><?= !empty($vuviec->han_xu_ly)
-    ? date('d/m/Y', strtotime(str_replace('/', '-', $vuviec->han_xu_ly)))
-    : '' ?>
-</span></span>
-                            <span class="text-slate-500">Cán bộ: <span class="font-medium text-slate-600"><?= Html::encode($vuviec->canBoTiepNhan->ho_ten ?? 'N/A') ?></span></span>
+
+        <!-- ③ PER-LAYER SECTIONS (13 separate layers) -->
+        <?php
+        $layerMeta = [
+            'muctieu_trongdiem'      => ['num'=>'01','icon'=>'🛡️','color'=>'#3b82f6','title'=>'Mục Tiêu Trọng Điểm'],
+            'khuvuc_phuctap_an_ninh' => ['num'=>'02','icon'=>'🛡️','color'=>'#2563eb','title'=>'Khu Vực Phức Tạp An Ninh'],
+            'cosonguyco_chayno'      => ['num'=>'03','icon'=>'🔥','color'=>'#ef4444','title'=>'Cơ Sở Nguy Cơ Cháy Nổ'],
+            'tru_nuoc_ccc'           => ['num'=>'04','icon'=>'🚰','color'=>'#dc2626','title'=>'Trụ Nước PCCC'],
+            'nguon_nuoc_ccc'         => ['num'=>'05','icon'=>'💧','color'=>'#b91c1c','title'=>'Nguồn Nước PCCC'],
+            'cosokinhdoanh_codk'     => ['num'=>'06','icon'=>'🏢','color'=>'#a855f7','title'=>'Cơ Sở Kinh Doanh Có Điều Kiện'],
+            'diem_tenannxh'          => ['num'=>'07','icon'=>'⚠️','color'=>'#8b5cf6','title'=>'Điểm Tệ Nạn Xã Hội'],
+            'camera_an_ninh'         => ['num'=>'08','icon'=>'📹','color'=>'#06b6d4','title'=>'Camera An Ninh'],
+            'chot_tuantre'           => ['num'=>'09','icon'=>'👮','color'=>'#0891b2','title'=>'Chốt Tuần Tra'],
+            'vu_viec'                => ['num'=>'10','icon'=>'⚖️','color'=>'#14b8a6','title'=>'Vụ Việc ANTT'],
+            'diem_nhay_cam'          => ['num'=>'11','icon'=>'🚨','color'=>'#0d9488','title'=>'Điểm Nhạy Cảm'],
+            'diem_trong_diem'        => ['num'=>'12','icon'=>'📍','color'=>'#0f766e','title'=>'Điểm Trọng Điểm'],
+            'noc_gia'                => ['num'=>'13','icon'=>'🏠','color'=>'#f97316','title'=>'Quản Lý Dân Cư (Nóc Gia)'],
+        ];
+
+        foreach ($layerMeta as $key => $meta):
+            $layer = $layerData[$key];
+            $ldo   = $layer['chart']['do'];
+            $lvang = $layer['chart']['vang'];
+            $lxanh = $layer['chart']['xanh'];
+            $ltot  = $ldo + $lvang + $lxanh;
+            $maxV  = max($ldo, $lvang, $lxanh, 1);
+            $c     = $meta['color'];
+            $cBg   = 'rgba('.implode(',',sscanf(ltrim($c,'#'),'%02x%02x%02x')).',.12)';
+            $cBd   = 'rgba('.implode(',',sscanf(ltrim($c,'#'),'%02x%02x%02x')).',.28)';
+        ?>
+        <!-- SEPARATOR -->
+        <div class="layer-sep">
+            <div class="layer-sep-num" style="--layer-bg:<?= $cBg ?>;--layer-border:<?= $cBd ?>;--layer-color:<?= $c ?>"><?= $meta['num'] ?></div>
+            <span class="layer-sep-title"><?= $meta['icon'] ?> <?= Html::encode($meta['title']) ?></span>
+            <div class="layer-sep-line"></div>
+            <span class="layer-sep-count"><?= $ltot ?> bản ghi</span>
+        </div>
+
+        <!-- DETAIL GRID -->
+        <div class="layer-detail-grid">
+
+            <!-- Bar mini -->
+            <div class="ud-card">
+                <div class="ud-card-head">
+                    <div class="ud-card-head-icon" style="background:<?= $cBg ?>">📊</div>
+                    <span class="ud-card-title">Biểu đồ phân loại</span>
+                </div>
+                <div class="ud-card-body">
+                    <div class="chart-wrap-sm">
+                        <canvas id="bar_<?= $key ?>"></canvas>
+                    </div>
+                </div>
+                <div class="bar-legend">
+                    <span class="bar-legend-item"><span class="legend-dot" style="background:#ef4444"></span>Đỏ</span>
+                    <span class="bar-legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Vàng</span>
+                    <span class="bar-legend-item"><span class="legend-dot" style="background:#22c55e"></span>Xanh</span>
+                </div>
+            </div>
+
+            <!-- Eval bars + mini stats -->
+            <div class="ud-card">
+                <div class="ud-card-head">
+                    <div class="ud-card-head-icon" style="background:<?= $cBg ?>">📋</div>
+                    <span class="ud-card-title">Mức độ đánh giá</span>
+                </div>
+                <div class="ud-card-body">
+                    <div class="eval-bars" style="margin-bottom:20px">
+                        <div class="eval-row">
+                            <span class="eval-label" style="color:#ef4444">🔴 Đỏ</span>
+                            <div class="eval-bar-track"><div class="eval-bar-fill" style="width:<?= $maxV ? round($ldo/$maxV*100) : 0 ?>%;background:#ef4444"></div></div>
+                            <span class="eval-num" style="color:#ef4444"><?= $ldo ?></span>
+                        </div>
+                        <div class="eval-row">
+                            <span class="eval-label" style="color:#f59e0b">🟡 Vàng</span>
+                            <div class="eval-bar-track"><div class="eval-bar-fill" style="width:<?= $maxV ? round($lvang/$maxV*100) : 0 ?>%;background:#f59e0b"></div></div>
+                            <span class="eval-num" style="color:#f59e0b"><?= $lvang ?></span>
+                        </div>
+                        <div class="eval-row">
+                            <span class="eval-label" style="color:#22c55e">🟢 Xanh</span>
+                            <div class="eval-bar-track"><div class="eval-bar-fill" style="width:<?= $maxV ? round($lxanh/$maxV*100) : 0 ?>%;background:#22c55e"></div></div>
+                            <span class="eval-num" style="color:#22c55e"><?= $lxanh ?></span>
                         </div>
                     </div>
-                <?php endforeach; endif; ?>
-            </div>
-        </div>
-    </div>
-
-    <!-- === Hàng 3: 6 Lớp Chuyên Đề Nghiệp Vụ === -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
-        <!-- Lớp Vụ Việc -->
-        <div class="card">
-            <div class="card-content">
-                <h3 class="layer-card-title text-blue-600"><i data-lucide="alert-circle"></i>Lớp Vụ Việc</h3>
-                <div class="layer-kpi-list">
-                    <?php foreach ($layerData['vuViec']['counts'] as $label => $value): ?>
-                    <div class="layer-kpi-item">
-                        <span class="layer-kpi-value"><?= $value ?></span>
-                        <span class="layer-kpi-label"><?= $label ?></span>
+                    <div class="stat-mini-grid">
+                        <div class="stat-mini-cell">
+                            <div class="stat-mini-val" style="color:#ef4444"><?= $ldo ?></div>
+                            <div class="stat-mini-lbl">Đỏ</div>
+                        </div>
+                        <div class="stat-mini-cell">
+                            <div class="stat-mini-val" style="color:#f59e0b"><?= $lvang ?></div>
+                            <div class="stat-mini-lbl">Vàng</div>
+                        </div>
+                        <div class="stat-mini-cell">
+                            <div class="stat-mini-val" style="color:#22c55e"><?= $lxanh ?></div>
+                            <div class="stat-mini-lbl">Xanh</div>
+                        </div>
                     </div>
-                    <?php endforeach; ?>
-                </div>
-                <div class="space-y-2">
-                    <?php foreach ($layerData['vuViec']['list'] as $item): ?>
-                    <div class="layer-sublist-item">
-                        <span class="text-sm text-slate-600 truncate pr-2"><?= Html::encode($item->tom_tat_noi_dung) ?></span>
-                        <span class="<?= get_badge_class('vuViec', $item->linhVuc->ten_linh_vuc ?? '') ?> truncate"><?= Html::encode($item->linhVuc->ten_linh_vuc ?? 'N/A') ?></span>
-                    </div>
-                    <?php endforeach; ?>
                 </div>
             </div>
-        </div>
 
-        <!-- Lớp An Ninh -->
-        <div class="card">
-            <div class="card-content">
-                <h3 class="layer-card-title text-purple-600"><i data-lucide="shield"></i>Lớp An Ninh</h3>
-                <div class="layer-kpi-list">
-                    <?php foreach ($layerData['anNinh']['counts'] as $label => $value): ?>
-                    <div class="layer-kpi-item">
-                        <span class="layer-kpi-value"><?= $value ?></span>
-                        <span class="layer-kpi-label"><?= $label ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <div class="space-y-2">
-                    <?php foreach ($layerData['anNinh']['list'] as $item): ?>
-                    <div class="layer-sublist-item">
-                        <span class="text-sm text-slate-600 truncate pr-2"><?= Html::encode($item->ten) ?></span>
-                        <span class="<?= get_badge_class('anNinh', $item->muc_do_phuctap) ?> truncate"><?= Html::encode($item->muc_do_phuctap) ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
         </div>
+        <?php endforeach; ?>
 
-        <!-- Lớp Trật Tự Xã Hội -->
-        <div class="card">
-            <div class="card-content">
-                <h3 class="layer-card-title text-orange-600"><i data-lucide="store"></i>Lớp Trật Tự Xã Hội</h3>
-                <div class="layer-kpi-list">
-                    <?php foreach ($layerData['tratTuXaHoi']['counts'] as $label => $value): ?>
-                    <div class="layer-kpi-item">
-                        <span class="layer-kpi-value"><?= $value ?></span>
-                        <span class="layer-kpi-label"><?= $label ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <div class="space-y-2">
-                    <?php foreach ($layerData['tratTuXaHoi']['list'] as $item): ?>
-                    <div class="layer-sublist-item">
-                        <span class="text-sm text-slate-600 truncate pr-2"><?= Html::encode($item->ten_co_so) ?></span>
-                        <span class="<?= get_badge_class('tratTuXaHoi', $item->loai_hinh_kinh_doanh) ?> truncate"><?= Html::encode($item->loai_hinh_kinh_doanh) ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Lớp Quản Lý Dân Cư -->
-        <div class="card">
-            <div class="card-content">
-                <h3 class="layer-card-title text-indigo-600"><i data-lucide="users"></i>Lớp Quản Lý Dân Cư</h3>
-                <div class="layer-kpi-list">
-                    <?php foreach ($layerData['quanLyDanCu']['counts'] as $label => $value): ?>
-                    <div class="layer-kpi-item">
-                        <span class="layer-kpi-value"><?= $value ?></span>
-                        <span class="layer-kpi-label"><?= $label ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <div class="space-y-2">
-                    <?php foreach ($layerData['quanLyDanCu']['list'] as $item): ?>
-                    <div class="layer-sublist-item">
-                        <span class="text-sm text-slate-600 truncate pr-2"><?= Html::encode($item->ho_ten) ?></span>
-                        <span class="<?= get_badge_class('quanLyDanCu', $item->nhom_doi_tuong) ?> truncate"><?= Html::encode($item->nhom_doi_tuong) ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Lớp Tuần Tra - Giám Sát -->
-        <div class="card">
-            <div class="card-content">
-                <h3 class="layer-card-title text-cyan-600"><i data-lucide="video"></i>Lớp Tuần Tra - Giám Sát</h3>
-                <div class="layer-kpi-list">
-                    <?php foreach ($layerData['tuanTraGiamSat']['counts'] as $label => $value): ?>
-                    <div class="layer-kpi-item">
-                        <span class="layer-kpi-value"><?= $value ?></span>
-                        <span class="layer-kpi-label"><?= $label ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <div class="space-y-2">
-                    <?php foreach ($layerData['tuanTraGiamSat']['list'] as $item): ?>
-                    <div class="layer-sublist-item">
-                        <span class="text-sm text-slate-600 truncate pr-2"><?= Html::encode($item->ten_diem) ?></span>
-                        <span class="<?= get_badge_class('tuanTraGiamSat', $item->trang_thai) ?> truncate"><?= Html::encode($item->trang_thai) ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Lớp PCCC -->
-        <div class="card">
-            <div class="card-content">
-                <h3 class="layer-card-title text-red-600"><i data-lucide="flame"></i>Lớp PCCC</h3>
-                <div class="layer-kpi-list">
-                    <?php foreach ($layerData['pccc']['counts'] as $label => $value): ?>
-                    <div class="layer-kpi-item">
-                        <span class="layer-kpi-value"><?= $value ?></span>
-                        <span class="layer-kpi-label"><?= $label ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <div class="space-y-2">
-                    <?php foreach ($layerData['pccc']['list'] as $item): ?>
-                    <div class="layer-sublist-item">
-                        <span class="text-sm text-slate-600 truncate pr-2"><?= Html::encode($item->ten_co_so) ?></span>
-                        <span class="<?= get_badge_class('pccc', $item->muc_do_nguy_co) ?> truncate"><?= Html::encode($item->muc_do_nguy_co) ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- === Hàng 4: Biểu đồ Phân Tích === -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Xu Hướng Vụ Việc -->
-        <div class="card">
-            <h2 class="card-title"><i data-lucide="line-chart" class="text-blue-500"></i>Xu Hướng Vụ Việc (30 Ngày Qua)</h2>
-            <div class="card-content h-72"><canvas id="trendChart"></canvas></div>
-        </div>
-
-        <!-- Tình Trạng Xử Lý -->
-        <div class="card">
-            <h2 class="card-title"><i data-lucide="pie-chart" class="text-green-500"></i>Tình Trạng Xử Lý Vụ Việc</h2>
-            <div class="card-content h-72 flex items-center justify-center"><canvas id="statusChart"></canvas></div>
-        </div>
-    </div>
-
+    </main>
 </div>
 
+<!-- ===== SCRIPTS ===== -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    lucide.createIcons();
+(function () {
+    /* ── Data ── */
+    const chartData    = <?= $chartDataJson ?>;
+    const summaryData  = <?= $summaryChartDataJson ?>;
+    const layerData    = <?= $layerDataJson ?>;
 
-    // === KHỞI TẠO BIỂU ĐỒ ===
-    const chartConfig = {
-        plugins: { 
-            legend: { 
-                labels: { color: '#475569', font: { family: 'inherit' } },
-                position: 'bottom'
-            } 
-        },
-        scales: {
-            y: { beginAtZero: true, grid: { color: '#e2e8f0' }, ticks: { color: '#64748b' } },
-            x: { grid: { display: false }, ticks: { color: '#64748b' } }
-        },
-        maintainAspectRatio: false,
-        responsive: true
-    };
-    const chartColors = ['#3b82f6', '#ef4444', '#22c55e', '#a855f7', '#06b6d4', '#f97316', '#14b8a6', '#6366f1'];
+    const RED    = '#ef4444';
+    const AMBER  = '#f59e0b';
+    const GREEN  = '#22c55e';
+    const SUMMARY_COLORS = ['#ef4444', '#f59e0b', '#22c55e'];
 
-    // 1. Trend Chart (Line)
-    const trendCtx = document.getElementById('trendChart')?.getContext('d');
-    if (trendCtx) {
-        const trendData = <?= $trendChartDataJson ?>;
-        const gradient = trendCtx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
-        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
-        new Chart(trendCtx, {
-            type: 'line',
-            data: {
-                labels: trendData.labels,
-                datasets: [{
-                    label: 'Vụ việc mới',
-                    data: trendData.data,
-                    borderColor: '#2563eb',
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#2563eb',
-                }]
-            },
-            options: { ...chartConfig, plugins: { legend: { display: false } } }
-        });
+    /* ── Helpers ── */
+    const ctx = id => document.getElementById(id)?.getContext('2d');
+    const sum = arr => arr.reduce((a,b) => a+b, 0);
+
+    /* ── Shared bar options ── */
+    function barOpts(labels) {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grace: '15%', // Tự động thêm khoảng trống trên đầu cột cao nhất để không bị đè số lượng
+                    grid:   { color: 'rgba(255,255,255,.05)' },
+                    ticks:  { color: '#8896b3', font: { size: 11 }, stepSize: 1 },
+                    border: { color: 'rgba(255,255,255,.08)' }
+                },
+                x: {
+                    grid:   { display: false },
+                    ticks:  { color: '#8896b3', font: { size: 11, weight: '600' } },
+                    border: { color: 'rgba(255,255,255,.08)' }
+                }
+            }
+        };
     }
-    
-    // 2. Status Chart (Doughnut)
-    const statusCtx = document.getElementById('statusChart')?.getContext('d');
-    if (statusCtx) {
-        const statusData = <?= $statusChartDataJson ?>;
-        new Chart(statusCtx, {
+
+    /* ── Main bar options ── */
+    function mainBarOpts(labels) {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grace: '15%', // Tự động thêm khoảng trống trên đầu cột cao nhất
+                    grid:   { color: 'rgba(255,255,255,.05)' },
+                    ticks:  { color: '#8896b3', font: { size: 10 }, stepSize: 1 },
+                    border: { color: 'rgba(255,255,255,.08)' }
+                },
+                x: {
+                    grid:   { display: false },
+                    ticks:  { color: '#8896b3', font: { size: 9, weight: '600' }, maxRotation: 45, minRotation: 45 },
+                    border: { color: 'rgba(255,255,255,.08)' }
+                }
+            }
+        };
+    }
+
+    /* ── Inline data-label plugin ── */
+    const dataLabelPlugin = {
+        id: 'ud_labels',
+        afterDatasetsDraw(chart) {
+            if (chart.config.type !== 'bar') return;
+            const { ctx: c, data } = chart;
+            c.save();
+            c.font = 'bold 11px JetBrains Mono, monospace';
+            c.fillStyle = '#f0f4ff';
+            c.textAlign = 'center';
+            c.textBaseline = 'bottom';
+            data.datasets.forEach((ds, i) => {
+                const meta = chart.getDatasetMeta(i);
+                meta.data.forEach((bar, j) => {
+                    const v = ds.data[j];
+                    if (v > 0) c.fillText(v, bar.x, bar.y - 4);
+                });
+            });
+            c.restore();
+        }
+    };
+
+    /* ── Donut factory ── */
+    function makeDonut(canvasId, totalElSel, data, colors) {
+        const c = ctx(canvasId);
+        if (!c) return;
+        const total = sum(data.data);
+        const el = document.querySelector(totalElSel);
+        if (el) el.textContent = total.toLocaleString('vi-VN');
+
+        new Chart(c, {
             type: 'doughnut',
             data: {
-                labels: statusData.labels,
-                datasets: [{
-                    data: statusData.data,
-                    backgroundColor: chartColors,
-                    borderColor: '#ffffff',
-                    borderWidth: 4,
-                    hoverOffset: 8
-                }]
+                labels: data.labels,
+                datasets: [{ data: data.data, backgroundColor: colors, borderWidth: 0, hoverBorderWidth: 3, hoverBorderColor: '#fff' }]
             },
-            options: { 
-                responsive: true, 
-                plugins: { legend: { position: 'bottom', labels: { color: '#475569', font: { family: 'inherit' } } } }, 
-                cutout: '70%' 
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '68%',
+                plugins: {
+                    legend: {
+                        display: true, position: 'bottom',
+                        labels: { color: '#8896b3', boxWidth: 10, usePointStyle: true, padding: 14, font: { size: 11 } }
+                    }
+                },
+                onHover(evt, elements) {
+                    if (!el) return;
+                    if (elements.length > 0) {
+                        el.textContent = data.data[elements[0].index].toLocaleString('vi-VN');
+                    } else {
+                        el.textContent = total.toLocaleString('vi-VN');
+                    }
+                }
             }
         });
     }
-});
-</script>
 
+    /* ── 1. MAIN BAR ── */
+    (() => {
+        const c = ctx('mainBarChart');
+        if (!c) return;
+        new Chart(c, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    { label: 'Đỏ',   backgroundColor: RED,   data: chartData.do,   barPercentage: .75, categoryPercentage: .65, borderRadius: 4, borderSkipped: false },
+                    { label: 'Vàng',  backgroundColor: AMBER, data: chartData.vang, barPercentage: .75, categoryPercentage: .65, borderRadius: 4, borderSkipped: false },
+                    { label: 'Xanh',  backgroundColor: GREEN, data: chartData.xanh, barPercentage: .75, categoryPercentage: .65, borderRadius: 4, borderSkipped: false },
+                ]
+            },
+            options: mainBarOpts(chartData.labels),
+            plugins: [dataLabelPlugin]
+        });
+    })();
+
+    /* ── 2. MAIN DONUT — tổng hợp đỏ/vàng/xanh từ 13 lớp ── */
+    makeDonut('mainDonutChart', '#mainDonutTotal', summaryData, SUMMARY_COLORS);
+
+    /* ── 3. LAYER BAR CHARTS ── */
+    const layers = [
+        'muctieu_trongdiem', 'khuvuc_phuctap_an_ninh', 'cosonguyco_chayno', 'tru_nuoc_ccc', 'nguon_nuoc_ccc',
+        'cosokinhdoanh_codk', 'diem_tenannxh', 'camera_an_ninh', 'chot_tuantre', 'vu_viec',
+        'diem_nhay_cam', 'diem_trong_diem', 'noc_gia'
+    ];
+
+    layers.forEach((key) => {
+        const lyr = layerData[key];
+        if (!lyr) return;
+
+        const bc = ctx(`bar_${key}`);
+        if (bc) {
+            new Chart(bc, {
+                type: 'bar',
+                data: {
+                    labels: ['Đỏ', 'Vàng', 'Xanh'],
+                    datasets: [{
+                        data: [lyr.chart.do, lyr.chart.vang, lyr.chart.xanh],
+                        backgroundColor: [RED, AMBER, GREEN],
+                        barPercentage: .6,
+                        borderRadius: 5,
+                        borderSkipped: false,
+                    }]
+                },
+                options: barOpts(['Đỏ','Vàng','Xanh']),
+                plugins: [dataLabelPlugin]
+            });
+        }
+    });
+
+})();
+</script>
